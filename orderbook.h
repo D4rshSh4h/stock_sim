@@ -11,7 +11,11 @@ public:
     ~Orderbook();
 
     void addOrder(Order order);
+    void removePrice(Order order);
     void removeOrder(Order order);
+    bool is_empty() const {};
+    int find_lowest_price() const {};
+    int find_highest_price() const {};
 
 private:
     std::map<int, std::queue<Order>> orderbook;

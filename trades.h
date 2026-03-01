@@ -1,7 +1,7 @@
 #include "orderbook.h"
 
 //Returns an order object with the given price and id
-Order set_order(int price, int id){}
+Order set_order(int price, int id, int type){}
 
 //Returns true if the order matches with an order in the orderbook, false otherwise. Function is called immideately after a new order is called
 //Takes liquidity from the market
@@ -10,6 +10,8 @@ bool buy_trade(Order order, Orderbook& orderbook){}
 bool sell_trade(Order order, Orderbook& orderbook){}
 
 //Runs the matching engine, which matches orders in the orderbook and executes trades
-void match_orders(Order order, Orderbook& orderbook){}
+void match_orders(Order order, Orderbook& buy, Orderbook& sell ){}
 
+
+void log_trade(Order& buyer, Order& seller, int price){}
 
