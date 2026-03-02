@@ -3,6 +3,7 @@
 
 #include <map>
 #include <queue>
+#include <optional>
 #include "order.h"
 
 class Orderbook {
@@ -16,6 +17,7 @@ public:
     bool is_empty() const {};
     int find_lowest_price() const {};
     int find_highest_price() const {};
+    std::optional<Order> get_order(int price) const {};
 
 private:
     std::map<int, std::queue<Order>> orderbook;

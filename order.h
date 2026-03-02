@@ -9,6 +9,7 @@ private:
 
 public:
     Order(int price, int id, int trade_type);
+    Order() = default;
 
     int getPrice() const;
     int getId() const;
