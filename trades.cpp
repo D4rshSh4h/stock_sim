@@ -1,6 +1,7 @@
 //Handles logic for executing trades and updating the orderbook accordingly
 #include "trades.h"
 #include <iostream>
+#include <fstream>
 
 Order set_order(int price, int id, int type) {
     Order order(price, id, type);
@@ -76,5 +77,30 @@ bool sell_trade(Order& order, Orderbook& buy, Orderbook& sell) {
     if (!match_orders(order, buy, sell)) {
         sell.addOrder(order);
         return false;
+    }
+}
+
+void prepare_file(void) {
+    std::ofstream log_file("trade_log.csv", std::ios::trunc);
+    if (log_file.is_open()) {
+        log_file << "Buyer ID, Seller ID, Price, Spread" << std::endl;
+        log_file.close();
+    } else {
+        std::cout << "Unable to initialize trade log file." << std::endl;
+    }
+}
+
+void log_trade(Order& buyer, Order& seller, int price, int spread) {
+    prepare_file();
+    std::ofstream log_file("trade_log.csv", std::ios::app);
+    if (log_file.is_open()) {
+        log_file << buyer.getId() 
+                 << ", " << seller.getId() 
+                 << ", " << price 
+                 << ", " << spread 
+                 << std::endl;
+        log_file.close();
+    } else {
+        std::cout << "Unable to open trade log file." << std::endl;
     }
 }

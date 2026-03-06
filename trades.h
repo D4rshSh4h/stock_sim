@@ -15,3 +15,5 @@ bool match_orders(Order& order, Orderbook& buy, Orderbook& sell ){}
 
 void log_trade(Order& buyer, Order& seller, int price, int spread){}
 int calculate_spread(Order& buy_order, Order& sell_order){}
+
+void prepare_file(void){}
