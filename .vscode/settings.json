@@ -1,0 +1,10 @@
+{
+    "code-runner.executorMap": {
+        "cpp": "cd $dir && clang++ -std=c++17 $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt"
+    },
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.cStandard": "c17",
+    "files.associations": {
+        "*.h": "cpp"
+    }
+}

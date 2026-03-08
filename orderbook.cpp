@@ -21,6 +21,9 @@ void Orderbook::removeOrder(Order order) {
     int price_index = order.getPrice();
     if(!orderbook[price_index].empty()){
         orderbook[price_index].pop();
+        if(orderbook[price_index].empty()){
+            this -> removePrice(order);
+        }
     }
     else{
         this -> removePrice(order);

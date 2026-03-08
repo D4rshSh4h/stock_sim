@@ -16,7 +16,6 @@ bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
     int trade_type = order.getTradeType(); // 0 for buy, 1 for sell
     int price = order.getPrice(); 
     
-    //order = a buy order
     if(trade_type == 0){
         while(!(sell.is_empty())){
             int lowest_sell_price = sell.find_lowest_price();
@@ -34,6 +33,8 @@ bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
                 int spread = calculate_spread(order, *sell_order);
                 log_trade(order, *sell_order, lowest_sell_price, spread);
                 sell.removeOrder(*sell_order);
+            } else {
+                break;
             }
 
         }
@@ -56,6 +57,8 @@ bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
                 int spread = calculate_spread(*buy_order, order);
                 log_trade(order, *buy_order, highest_buy_price, spread);
                 buy.removeOrder(*buy_order);
+            } else {
+                break;
             }
 
         }
@@ -70,6 +73,7 @@ bool buy_trade(Order& order, Orderbook& buy, Orderbook& sell) {
         buy.addOrder(order);
         return false;
     }
+    return true;
 }
 
 bool sell_trade(Order& order, Orderbook& buy, Orderbook& sell) {
@@ -78,6 +82,7 @@ bool sell_trade(Order& order, Orderbook& buy, Orderbook& sell) {
         sell.addOrder(order);
         return false;
     }
+    return true;
 }
 
 void prepare_file(void) {
