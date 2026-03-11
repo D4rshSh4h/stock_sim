@@ -12,31 +12,31 @@ int calculate_spread(Order& buy_order, Order& sell_order) {
     return sell_order.getPrice() - buy_order.getPrice();
 }
 
+// Matches a single incoming order against the opposite book
 bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
-    int trade_type = order.getTradeType(); // 0 for buy, 1 for sell
+    int trade_type = order.getTradeType();
     int price = order.getPrice(); 
+    bool matched = false;
     
     if(trade_type == 0){
         while(!(sell.is_empty())){
             int lowest_sell_price = sell.find_lowest_price();
             if(lowest_sell_price == -1){
-                std::cout << "Error: Sell orderbook is empty." << std::endl;
                 return false;
             }
             if (lowest_sell_price <= price){
                 auto sell_order = sell.get_order(lowest_sell_price);
-                if (!sell_order.has_value()) {
-                    std::cout << "Error: No sell orders found at lowest price." << std::endl;
+                if (!sell_order.has_value()){
                     return false;
                 }
-                std::cout << "Trade executed at price: " << lowest_sell_price << std::endl;
                 int spread = calculate_spread(order, *sell_order);
                 log_trade(order, *sell_order, lowest_sell_price, spread);
                 sell.removeOrder(*sell_order);
+                matched = true;
+                break; // incoming order fully filled, stop
             } else {
                 break;
             }
-
         }
     }
 
@@ -44,26 +44,49 @@ bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
         while(!(buy.is_empty())){
             int highest_buy_price = buy.find_highest_price();
             if(highest_buy_price == -1){
-                std::cout << "Error: Buy orderbook is empty." << std::endl;
                 return false;
             }
             if (highest_buy_price >= price){
                 auto buy_order = buy.get_order(highest_buy_price);
-                if (!buy_order.has_value()) {
-                    std::cout << "Error: No buy orders found at highest price." << std::endl;
+                if (!buy_order.has_value()){
                     return false;
                 }
-                std::cout << "Trade executed at price: " << highest_buy_price << std::endl;
                 int spread = calculate_spread(*buy_order, order);
-                log_trade(order, *buy_order, highest_buy_price, spread);
+                log_trade(*buy_order, order, highest_buy_price, spread);
                 buy.removeOrder(*buy_order);
+                matched = true;
+                break; // incoming order fully filled, stop
             } else {
                 break;
             }
-
         }
     }
-    return true;
+    return matched;
+}
+
+// Sweeps resting orders in both books and matches them against each other
+void sweep_book(Orderbook& buy, Orderbook& sell) {
+    while (!buy.is_empty() && !sell.is_empty()) {
+        int highest_buy_price = buy.find_highest_price();
+        int lowest_sell_price = sell.find_lowest_price();
+
+        if (highest_buy_price == -1 || lowest_sell_price == -1) break;
+
+        if (highest_buy_price >= lowest_sell_price) {
+            auto buy_order = buy.get_order(highest_buy_price);
+            auto sell_order = sell.get_order(lowest_sell_price);
+
+            if (!buy_order.has_value() || !sell_order.has_value()) break;
+
+            int spread = calculate_spread(*buy_order, *sell_order);
+            log_trade(*buy_order, *sell_order, lowest_sell_price, spread);
+            buy.removeOrder(*buy_order);
+            sell.removeOrder(*sell_order);
+            // remove break here when handling multiple trades
+        } else {
+            break;
+        }
+    }
 }
 
 //Receives a new incoming order, Decides what to do with it, Calls the matching logic, If unmatched, rests the order in the book

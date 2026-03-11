@@ -12,6 +12,7 @@ bool sell_trade(Order &order, Orderbook &buy, Orderbook &sell);
 // Runs the matching engine, which matches orders in the orderbook and executes
 // trades
 bool match_orders(Order &order, Orderbook &buy, Orderbook &sell);
+void sweep_book(Orderbook& buy, Orderbook& sell);
 
 void log_trade(Order &buyer, Order &seller, int price, int spread);
 int calculate_spread(Order &buy_order, Order &sell_order);

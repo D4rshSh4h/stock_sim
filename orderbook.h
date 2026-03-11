@@ -10,7 +10,8 @@ class Orderbook {
 public:
   Orderbook();
   ~Orderbook();
-
+  
+  int get_size() const;
   void addOrder(Order order);
   void removePrice(Order order);
   void removeOrder(Order order);

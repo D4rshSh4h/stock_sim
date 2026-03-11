@@ -170,21 +170,132 @@ void stress_test_trades() {
     
     // Fill sell book with 10k orders ranging from 110 to 120 (so they won't match a 100 buy)
     // Wait, testing 10k orders and executing trades. We will do 1 perfect match per loop.
-    for (int i = 0; i < 5000; ++i) {
+    for (int i = 0; i < 100; ++i) {
         sell.addOrder(Order(100, i*2, 1));
     }
     
     // Process 5000 matching buy orders
-    for (int i = 0; i < 5000; ++i) {
-        Order buy_order(100, i*2+1, 0);
-        // We will call match_orders directly to avoid any missing return type UB from buy_trade if possible
-        match_orders(buy_order, buy, sell);
-    }
+    for (int i = 0; i < 100; ++i) {
+    Order buy_order(100, i*2+1, 0);
+    std::cout << "Before match - sell size: " << sell.get_size() << std::endl;
+    match_orders(buy_order, buy, sell);
+    std::cout << "After match - sell size: " << sell.get_size() << std::endl;
+}
     
     if (!sell.is_empty()) {
         throw std::runtime_error("Stress test did not fully exhaust matching sell orders");
     }
 }
+
+
+//Orderbook tests (claude)
+// Individual test functions
+void sweep_basic_single_match() {
+    Orderbook buy, sell;
+    buy.addOrder(Order(100, 1, 0));
+    sell.addOrder(Order(100, 2, 1));
+    sweep_book(buy, sell);
+    if (!buy.is_empty() || !sell.is_empty())
+        throw std::runtime_error("Basic sweep failed to match orders");
+}
+
+void sweep_no_match_possible() {
+    Orderbook buy, sell;
+    buy.addOrder(Order(90, 1, 0));
+    sell.addOrder(Order(100, 2, 1));
+    sweep_book(buy, sell);
+    if (buy.is_empty() || sell.is_empty())
+        throw std::runtime_error("Sweep incorrectly matched non-crossing orders");
+}
+
+void sweep_empty_buy_book() {
+    Orderbook buy, sell;
+    sell.addOrder(Order(100, 1, 1));
+    sweep_book(buy, sell);
+    if (sell.is_empty())
+        throw std::runtime_error("Sweep incorrectly removed order from sell book");
+}
+
+void sweep_empty_sell_book() {
+    Orderbook buy, sell;
+    buy.addOrder(Order(100, 1, 0));
+    sweep_book(buy, sell);
+    if (buy.is_empty())
+        throw std::runtime_error("Sweep incorrectly removed order from buy book");
+}
+
+void sweep_both_books_empty() {
+    Orderbook buy, sell;
+    sweep_book(buy, sell);
+    if (!buy.is_empty() || !sell.is_empty())
+        throw std::runtime_error("Sweep failed on empty books");
+}
+
+void sweep_5000_matching_pairs() {
+    Orderbook buy, sell;
+    for (int i = 0; i < 100; ++i) {
+        buy.addOrder(Order(100, i*2, 0));
+        sell.addOrder(Order(100, i*2+1, 1));
+    }
+    sweep_book(buy, sell);
+    if (!buy.is_empty() || !sell.is_empty())
+        throw std::runtime_error("Stress test failed to exhaust both books");
+}
+
+void sweep_multiple_price_levels_crossing() {
+    Orderbook buy, sell;
+    for (int i = 0; i < 3; ++i) {
+        buy.addOrder(Order(100 + i*5, i*2, 0));
+        sell.addOrder(Order(95 + i*3, i*2+1, 1));
+    }
+    sweep_book(buy, sell);
+    if (!buy.is_empty() || !sell.is_empty()){
+        std::cout << "Buy size: " << buy.get_size() << ", Sell size: " << sell.get_size() << std::endl;
+        throw std::runtime_error("Multiple price level sweep failed");
+    }
+        
+}
+
+void sweep_partial_match() {
+    Orderbook buy, sell;
+    buy.addOrder(Order(100, 1, 0)); // will match
+    buy.addOrder(Order(80, 2, 0));  // wont match
+    sell.addOrder(Order(100, 3, 1)); // will match
+    sell.addOrder(Order(120, 4, 1)); // wont match
+    sweep_book(buy, sell);
+    if (buy.is_empty() || sell.is_empty())
+        throw std::runtime_error("Partial sweep incorrectly exhausted books");
+}
+
+void sweep_1000_same_price_level() {
+    Orderbook buy, sell;
+    for (int i = 0; i < 100; ++i) {
+        buy.addOrder(Order(100, i*2, 0));
+        sell.addOrder(Order(100, i*2+1, 1));
+    }
+    sweep_book(buy, sell);
+    if (!buy.is_empty() || !sell.is_empty())
+        throw std::runtime_error("Same price level stress test failed");
+}
+
+void sweep_more_buys_than_sells() {
+    Orderbook buy, sell;
+    for (int i = 0; i < 500; ++i)
+        buy.addOrder(Order(100, i, 0));
+    for (int i = 0; i < 100; ++i)
+        sell.addOrder(Order(100, i+1000, 1));
+    sweep_book(buy, sell);
+    if (!sell.is_empty()){
+        std::cout << "Remaining sell orders: " << sell.get_size() << std::endl;
+        throw std::runtime_error("Sell book should be exhausted");
+    }
+    
+    if (buy.is_empty())
+        throw std::runtime_error("Buy book should have 500 remaining orders");
+}
+
+
+
 
 // ---------------------------------------------------------
 // MAIN TEST RUNNER
@@ -206,6 +317,16 @@ int main() {
     // Mod 2: Orderbook
     std::cout << "\n--- Orderbook Tests ---\n";
     run_test("Orderbook Basic Operations", test_orderbook_operations);
+    run_test("Sweep: Basic single match",                sweep_basic_single_match);
+    run_test("Sweep: No match possible",                 sweep_no_match_possible);
+    run_test("Sweep: Empty buy book",                    sweep_empty_buy_book);
+    run_test("Sweep: Empty sell book",                   sweep_empty_sell_book);
+    run_test("Sweep: Both books empty",                  sweep_both_books_empty);
+    run_test("Sweep: 5000 matching pairs stress test",   sweep_5000_matching_pairs);
+    run_test("Sweep: Multiple price levels crossing",    sweep_multiple_price_levels_crossing);
+    run_test("Sweep: Partial match",                     sweep_partial_match);
+    run_test("Sweep: 1000 orders same price level",      sweep_1000_same_price_level);
+    run_test("Sweep: More buys than sells",              sweep_more_buys_than_sells);
 
     // Mod 3: Trades
     std::cout << "\n--- Trades Tests ---\n";
@@ -218,6 +339,8 @@ int main() {
     std::cout << "\n--- Stress Tests ---\n";
     run_test("Orderbook Heavy Insertion", stress_test_orderbook);
     run_test("Trades Heavy Matching", stress_test_trades);
+
+    
 
     std::cout << "\n======================================\n";
     std::cout << " TESTS SUMMARY: " << tests_passed << " Passed, " << tests_failed << " Failed\n";

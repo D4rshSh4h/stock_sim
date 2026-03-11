@@ -57,3 +57,6 @@ std::optional<Order> Orderbook::get_order(int price) const {
     return std::nullopt; // Return an empty optional if no orders are found at this price
 }
 
+int Orderbook::get_size() const {
+    return orderbook.size();
+}
