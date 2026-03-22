@@ -120,7 +120,8 @@ void prepare_file(void) {
 
 void log_trade(Order& buyer, Order& seller, int price, int spread) {
     prepare_file();
-    std::ofstream log_file("trade_log.csv", std::ios::app);
+    //TODO: logic to update state of agents
+    std::ofstream log_file("trade_log.csv",      std::ios::app);
     if (log_file.is_open()) {
         log_file << buyer.getId() 
                  << ", " << seller.getId() 
