@@ -6,9 +6,9 @@
 #include <future>
 #include <string>
 
-#include "order.h"
-#include "orderbook.h"
-#include "trades.h"
+#include "../Order_structures/order.h"
+#include "../Order_structures/orderbook.h"
+#include "../Trade_logic/trades.h"
 
 // Basic Test Runner Utility
 int tests_passed = 0;

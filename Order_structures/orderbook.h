@@ -16,12 +16,12 @@ public:
   void removePrice(Order order);
   void removeOrder(Order order);
   bool is_empty() const;
-  int find_lowest_price() const;
-  int find_highest_price() const;
-  std::optional<Order> get_order(int price) const;
+  float find_lowest_price() const;
+  float find_highest_price() const;
+  std::optional<Order> get_order(float price) const;
 
 private:
-  std::map<int, std::queue<Order>> orderbook;
+  std::map<float, std::queue<Order>> orderbook;
 };
 
 #endif // ORDERBOOK_H

@@ -3,7 +3,7 @@
 
 class Order {
 private:
-    int price;
+    float price;
     int id;
     int trade_type; // 0 for buy, 1 for sell
 
@@ -11,7 +11,7 @@ public:
     Order(int price, int id, int trade_type);
     Order() = default;
 
-    int getPrice() const;
+    float getPrice() const;
     int getId() const;
     int getTradeType() const;
 };
