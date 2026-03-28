@@ -4,10 +4,10 @@
 Orderbook::Orderbook() {}
 Orderbook::~Orderbook() {}
 
-void Orderbook::addOrder(Order order) {
+void Orderbook::addOrder(const Order &order) {
     orderbook[order.getPrice()].push(order);
 }
-void Orderbook::removePrice(Order order) {
+void Orderbook::removePrice(const Order &order) {
     float price_remove = order.getPrice();
     int check = orderbook.erase(price_remove);
     if (check == 0) {
@@ -17,7 +17,7 @@ void Orderbook::removePrice(Order order) {
 }
 
 //Removes the order at the front of the queue for the given price. If the queue is empty, removes the price from the orderbook
-void Orderbook::removeOrder(Order order) {
+void Orderbook::removeOrder(const Order &order) {
     float price_index = order.getPrice();
     if(!orderbook[price_index].empty()){
         orderbook[price_index].pop();

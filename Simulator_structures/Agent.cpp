@@ -31,6 +31,9 @@ std::optional<Order> Agent::agent_sell(float mkt_price) {
     float delta = RANGE * mkt_price;
     std::uniform_real_distribution<float> price_dist(mkt_price - delta, mkt_price + delta);
     float price = price_dist(gen);
+    if(shares < 1){
+        return std::nullopt; // Not enough shares to sell
+    }
     return std::make_optional(Order(price, id, 1));
 }
 
@@ -88,4 +91,27 @@ std::optional<Order> Agent::prediction_engine() {
         }
     }
 
+}
+
+void Agent::place_order(Order& order) {
+    if (order.getTradeType() == 0) {
+        simulator.get_buy_book().addOrder(order);
+        cash -= order.getPrice(); // Deduct cash immediately when placing a buy order
+    } else {
+        simulator.get_sell_book().addOrder(order);
+        shares -= 1; // Deduct shares immediately when placing a sell order (assuming 1 share per order)
+    }
+}
+
+void Agent::run_agent() {
+    auto order_opt = prediction_engine();
+    if (order_opt.has_value()) {
+        place_order(*order_opt);
+        if(order_opt->getTradeType() == 0){
+            state = 'b';
+        }
+        else{
+            state = 's';
+        }
+    }
 }

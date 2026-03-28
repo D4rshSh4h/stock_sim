@@ -12,9 +12,9 @@ public:
   ~Orderbook();
   
   int get_size() const;
-  void addOrder(Order order);
-  void removePrice(Order order);
-  void removeOrder(Order order);
+  void addOrder(const Order &order);
+  void removePrice(const Order &order);
+  void removeOrder(const Order &order);
   bool is_empty() const;
   float find_lowest_price() const;
   float find_highest_price() const;
