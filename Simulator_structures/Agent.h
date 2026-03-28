@@ -3,6 +3,7 @@
 
 #include "Simulator.h"
 #include "../Order_structures/orderbook.h"
+#include <random>
 
 class Agent{
     private:
@@ -11,9 +12,14 @@ class Agent{
         float cash;
         int shares;
         char state; // b for buying, s for selling, h for holding, l for perfectly liquid, m or mix of both shares and cash
-        Order prediction_engine();
+        std::optional<Order> prediction_engine();
         void place_order(Order& order);
-    public:
+        bool decide2();
+        int decide3();
+        static std::mt19937 gen;  // Random number generator for the prediction engine
+        std::optional<Order> agent_buy(float mkt_price);
+        std::optional<Order> agent_sell(float mkt_price);
+        public:
         Agent() = default;
         Agent(Simulator& sim, int id, float cash, int shares, char state); 
         ~Agent();
