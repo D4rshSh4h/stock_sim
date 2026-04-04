@@ -19,15 +19,16 @@ class Agent{
         static std::mt19937 gen;  // Random number generator for the prediction engine
         std::optional<Order> agent_buy(float mkt_price);
         std::optional<Order> agent_sell(float mkt_price);
-        public:
+    public:
         Agent() = default;
         Agent(Simulator& sim, int id, float cash, int shares, char state); 
         ~Agent();
         //current mkt price is a simulator function
         //Changing state will be done in log_trade in trades.cpp, unless order is bieng placed in which case it will be done here
         void run_agent();
+        void change_state(char new_state, float added_cash, int added_shares);
         
-
-};
+    
+}; 
 
 #endif // AGENT_H

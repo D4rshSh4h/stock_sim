@@ -14,7 +14,9 @@ bool sell_trade(Order &order, Orderbook &buy, Orderbook &sell);
 bool match_orders(Order &order, Orderbook &buy, Orderbook &sell);
 void sweep_book(Orderbook& buy, Orderbook& sell);
 
+void prepare_file(void);
 void log_trade(Order &buyer, Order &seller, float price, float spread);
 float calculate_spread(Order &buy_order, Order &sell_order);
 
-void prepare_file(void);
+//void update_agent_state(Order& buyer, Order& seller, float price);
+

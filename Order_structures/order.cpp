@@ -7,4 +7,4 @@ float Order::getPrice() const { return price; }
 
 int Order::getTradeType() const { return trade_type; }
 
-int Order::getId() const { return id; }
+int Order::getId() const { return id; } 

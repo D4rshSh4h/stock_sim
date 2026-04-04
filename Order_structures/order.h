@@ -4,7 +4,7 @@
 class Order {
 private:
     float price;
-    int id;
+    int id; //ID of agent which placed the order
     int trade_type; // 0 for buy, 1 for sell
 
 public:

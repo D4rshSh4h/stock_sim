@@ -1,4 +1,6 @@
-#include "Simulator.h"  
+#include "Simulator.h" 
+#include "Agent.h" 
+#include "../Trade_logic/trades.h"
 
 Simulator::Simulator(float initial_price) : current_price(initial_price), volume(0), time(0) {}
 Simulator::~Simulator() {}  
@@ -46,5 +48,37 @@ void Simulator::update_price(float lowest_ask, float highest_bid) {
         current_price = lowest_ask; // If only ask is available, use it
     } else if (highest_bid != -1) {
         current_price = highest_bid; // If only bid is available, use it
+    }
+}
+
+Agent* Simulator::get_agent(int id) {
+    auto it = agents.find(id);
+    if (it != agents.end()) {
+        return it->second.get();
+    }
+    return nullptr; // Return nullptr if no agent is found with the given id
+}
+
+void Simulator::simulator_buy_trade(Order& order) {
+    buy_trade(order, buy_book, sell_book);
+}
+
+void Simulator::simulator_sell_trade(Order& order) {
+    sell_trade(order, sell_book, buy_book);
+} 
+
+void Simulator::on_trade_agent_state(const Order& buy_order, const Order& sell_order, float price, float spread) {
+    
+    int buy_id = buy_order.getId();
+    int sell_id = sell_order.getId();
+
+    Agent* buyer = get_agent(buy_id);
+    Agent* seller = get_agent(sell_id);
+
+    if (buyer) {
+        buyer->change_state('h', 0, 1); // Buyer receives 1 share + changed state to holding
+    }
+    if (seller) {
+        seller->change_state('l', price, 0); // Seller receives cash + changed state to perfectly liquid
     }
 }

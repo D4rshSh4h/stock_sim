@@ -95,13 +95,13 @@ std::optional<Order> Agent::prediction_engine() {
 
 void Agent::place_order(Order& order) {
     if (order.getTradeType() == 0) {
-        simulator.get_buy_book().addOrder(order);
+        simulator.simulator_buy_trade(order); 
         cash -= order.getPrice(); // Deduct cash immediately when placing a buy order
     } else {
-        simulator.get_sell_book().addOrder(order);
+        simulator.simulator_sell_trade(order); 
         shares -= 1; // Deduct shares immediately when placing a sell order (assuming 1 share per order)
     }
-}
+} 
 
 void Agent::run_agent() {
     auto order_opt = prediction_engine();
@@ -114,4 +114,10 @@ void Agent::run_agent() {
             state = 's';
         }
     }
+}
+
+void Agent::change_state(char new_state, float added_cash, int added_shares) {
+    state = new_state;
+    cash += added_cash;
+    shares += added_shares;
 }
