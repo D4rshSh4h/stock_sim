@@ -11,7 +11,7 @@ class Agent{
         int id;
         float cash;
         int shares;
-        char state; // b for buying, s for selling, h for holding, l for perfectly liquid, m or mix of both shares and cash
+        char state; // b for buying, s for selling, h for holding, l for perfectly liquid, m or mix of both shares and cash, u for uninitialized
         std::optional<Order> prediction_engine();
         void place_order(Order& order);
         bool decide2();
@@ -27,6 +27,7 @@ class Agent{
         //Changing state will be done in log_trade in trades.cpp, unless order is bieng placed in which case it will be done here
         void run_agent();
         void change_state(char new_state, float added_cash, int added_shares);
+        int get_id() const;
         
     
 }; 

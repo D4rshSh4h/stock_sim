@@ -121,3 +121,7 @@ void Agent::change_state(char new_state, float added_cash, int added_shares) {
     cash += added_cash;
     shares += added_shares;
 }
+
+int Agent::get_id() const {
+    return id;
+}

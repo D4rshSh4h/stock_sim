@@ -96,7 +96,7 @@ void sweep_book(Orderbook& buy, Orderbook& sell) {
 }
 
 //Receives a new incoming order, Decides what to do with it, Calls the matching logic, If unmatched, rests the order in the book
-bool buy_trade(Order& order, Orderbook& buy, Orderbook& sell) { //TODO add param for callback
+bool buy_trade(Order& order, Orderbook& buy, Orderbook& sell) { 
     //If trade not matched add to orderbook
     if (!match_orders(order, buy, sell)) {
         buy.addOrder(order);
@@ -126,7 +126,6 @@ void prepare_file(void) {
 
 void log_trade(Order& buyer, Order& seller, float price, float spread) {
     prepare_file(); //TODO check logic
-    //TODO: logic to update state of agents + update thier cash/shares based on the trade. (cash+shares already deducted when order placed)
     if(trade_observer){
         trade_observer->on_trade_agent_state(buyer, seller, price, spread);
     }
