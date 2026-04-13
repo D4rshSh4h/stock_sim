@@ -20,7 +20,7 @@ float calculate_spread(Order& buy_order, Order& sell_order) {
 // Matches a single incoming order against the opposite book
 bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
     int trade_type = order.getTradeType();
-    float price = order.getPrice(); 
+    float order_price = order.getPrice(); 
     bool matched = false;
     
     if(trade_type == 0){
@@ -29,7 +29,7 @@ bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
             if(lowest_sell_price == -1){
                 return false;
             }
-            if (lowest_sell_price <= price){
+            if (lowest_sell_price <= order_price){
                 auto sell_order = sell.get_order(lowest_sell_price);
                 if (!sell_order.has_value()){
                     return false;
@@ -51,7 +51,7 @@ bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
             if(highest_buy_price == -1){
                 return false;
             }
-            if (highest_buy_price >= price){
+            if (highest_buy_price >= order_price){
                 auto buy_order = buy.get_order(highest_buy_price);
                 if (!buy_order.has_value()){
                     return false;
@@ -132,7 +132,8 @@ void log_trade(Order& buyer, Order& seller, float price, float spread) {
     else{
         std::cout << "No trade observer set. Unable to update agent states." << std::endl;
     }
-    std::ofstream log_file("../trade_log.csv",      std::ios::app);
+    //std::cout << "Log trade called" << std::endl;
+    std::ofstream log_file("trade_log.csv",      std::ios::app);
     if (log_file.is_open()) {
         log_file << buyer.getId() 
                  << ", " << seller.getId() 

@@ -82,7 +82,7 @@ void Simulator::simulator_buy_trade(Order& order) { //TODO logic for mid price/f
 }
 
 void Simulator::simulator_sell_trade(Order& order) {
-    sell_trade(order, sell_book, buy_book);
+    sell_trade(order, buy_book, sell_book);
     /*
     float p = order.getPrice();
     if(p < best_ask){

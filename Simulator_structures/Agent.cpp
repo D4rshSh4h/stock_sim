@@ -3,7 +3,7 @@
 #include <iostream>
 //#include <stdexcept>
 
-const float RANGE = 0.01; //Range for random price generation in prediction engine
+const float RANGE = 0.1; //Range for random price generation in prediction engine
 
 Agent::Agent(Simulator& sim, int id, float cash, int shares, char state) : simulator(sim), id(id), cash(cash), shares(shares), state(state) {}
 Agent::~Agent() {}
