@@ -3,7 +3,7 @@
 
 #include "Simulator.h"
 #include "../Order_structures/orderbook.h"
-#include <random>
+
 
 class Agent{
     private:
@@ -16,7 +16,7 @@ class Agent{
         void place_order(Order& order);
         bool decide2();
         int decide3();
-        static std::mt19937 gen;  // Random number generator for the prediction engine
+        //static std::mt19937 gen;   Random number generator for the prediction engine
         std::optional<Order> agent_buy(float mkt_price);
         std::optional<Order> agent_sell(float mkt_price);
     public:

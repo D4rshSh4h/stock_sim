@@ -1,4 +1,5 @@
 #include "Agent.h"
+#include "rng.h"
 #include <iostream>
 //#include <stdexcept>
 
@@ -7,20 +8,21 @@ const float RANGE = 0.01; //Range for random price generation in prediction engi
 Agent::Agent(Simulator& sim, int id, float cash, int shares, char state) : simulator(sim), id(id), cash(cash), shares(shares), state(state) {}
 Agent::~Agent() {}
 
-std::mt19937 Agent::gen{std::random_device{}()};  // Random number generator for the prediction engine
+//std::mt19937 Agent::gen{std::random_device{}()};   Random number generator for the prediction engine
 bool Agent::decide2() {
     std::bernoulli_distribution dist(0.5); // 50% chance to return true or false
-    return dist(gen); // Returns true or false
+    return dist(get_rng()); // Returns true or false
 }
 int Agent::decide3() {
     std::uniform_int_distribution<> dist(0, 2); // 0, 1, or 2
-    return dist(gen); // Returns 0, 1, or 2
+    return dist(get_rng()); // Returns 0, 1, or 2
+
 }
 
 std::optional<Order> Agent::agent_buy(float mkt_price) {
     float delta = RANGE * mkt_price;
     std::uniform_real_distribution<float> price_dist(mkt_price - delta, mkt_price + delta);
-    float price = price_dist(gen);
+    float price = price_dist(get_rng());
     if (cash < price){
         return std::nullopt; // Not enough cash to buy
     }
@@ -30,7 +32,7 @@ std::optional<Order> Agent::agent_buy(float mkt_price) {
 std::optional<Order> Agent::agent_sell(float mkt_price) {
     float delta = RANGE * mkt_price;
     std::uniform_real_distribution<float> price_dist(mkt_price - delta, mkt_price + delta);
-    float price = price_dist(gen);
+    float price = price_dist(get_rng());
     if(shares < 1){
         return std::nullopt; // Not enough shares to sell
     }

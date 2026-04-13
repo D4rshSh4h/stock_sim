@@ -1,5 +1,5 @@
 #include "../Order_structures/orderbook.h"
-
+#include "../Simulator_structures/TradeObserver.h"
 // Returns an order object with the given price and id
 Order set_order(float price, int id, int type);
 
@@ -20,3 +20,4 @@ float calculate_spread(Order &buy_order, Order &sell_order);
 
 //void update_agent_state(Order& buyer, Order& seller, float price);
 
+void set_trade_observer(TradeObserver* observer);

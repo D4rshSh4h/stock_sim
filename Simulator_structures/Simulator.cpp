@@ -1,6 +1,7 @@
 #include "Simulator.h" 
 #include "Agent.h" 
 #include "../Trade_logic/trades.h"
+#include "rng.h"
 #include <vector>
 #include <algorithm>
 #include <iterator>
@@ -9,6 +10,7 @@
 
 Simulator::Simulator(float initial_price, float total_cash, int total_shares) : current_price(initial_price), volume(0), time(0), total_cash(total_cash), total_shares(total_shares) {}
 Simulator::~Simulator() {}  
+auto& gen = get_rng(); // Random number generator for the simulator
 
 float Simulator::get_current_price() const {
     return current_price;
@@ -38,7 +40,11 @@ Orderbook& Simulator::get_sell_book() {
     return sell_book;
 }
 
-void Simulator::log_price() {
+void Simulator::reset_volume() {
+    volume = 0;
+}
+
+void Simulator::log_price() { //TODO log into a file for price and volume over time, also log bid-ask spread over time
     price_time_log[time] = current_price;
 }   
 
@@ -64,18 +70,34 @@ Agent* Simulator::get_agent(int id) {
     return nullptr; // Return nullptr if no agent is found with the given id
 }
 
-void Simulator::simulator_buy_trade(Order& order) {
+void Simulator::simulator_buy_trade(Order& order) { //TODO logic for mid price/fair price
     buy_trade(order, buy_book, sell_book);
+    /*
+    float p = order.getPrice();
+    if(p > best_bid){
+        best_bid = p;
+    }
+    */
+    
 }
 
 void Simulator::simulator_sell_trade(Order& order) {
     sell_trade(order, sell_book, buy_book);
+    /*
+    float p = order.getPrice();
+    if(p < best_ask){
+        best_ask = p;
+    }
+    */
+    
 } 
 
 void Simulator::on_trade_agent_state(const Order& buy_order, const Order& sell_order, float price, float spread) {
     
     int buy_id = buy_order.getId();
     int sell_id = sell_order.getId();
+
+    current_price = price;
 
     Agent* buyer = get_agent(buy_id);
     Agent* seller = get_agent(sell_id);
@@ -86,6 +108,21 @@ void Simulator::on_trade_agent_state(const Order& buy_order, const Order& sell_o
     if (seller) {
         seller->change_state('l', price, 0); // Seller receives cash + changed state to perfectly liquid
     }
+    volume++;
+}
+
+void Simulator::create_vector_agent_ids() {
+    agent_ids.clear();
+    for (const auto& pair : agents) {
+        agent_ids.push_back(pair.first);
+    }
+}
+
+std::vector<int> Simulator::shuffle_agent_ids() {
+    std::vector<int> shuffled_ids = agent_ids;
+    //static std::mt19937 gen(std::random_device{}());
+    std::shuffle(shuffled_ids.begin(), shuffled_ids.end(), gen);
+    return shuffled_ids;
 }
 
 void Simulator::simulator_start(int no_agents) {
@@ -94,7 +131,7 @@ void Simulator::simulator_start(int no_agents) {
         temp_agent_vector.emplace_back(std::make_unique<Agent>(*this, i, 0.00, 0, 'u'));
     }
    
-    std::mt19937 gen(std::random_device{}());
+    //std::mt19937 gen(std::random_device{}());
     std::shuffle(temp_agent_vector.begin(), temp_agent_vector.end(), gen);
     std::uniform_int_distribution<size_t> dist(1, no_agents-1);
     size_t split_index = dist(gen); //Use this for the two groups of agents, one with cash and one with shares.
@@ -150,7 +187,7 @@ void Simulator::simulator_start(int no_agents) {
     for(auto& agent_ptr : temp_agent_vector){
     int id = agent_ptr->get_id();
     agents[id] = std::move(agent_ptr);
-}
-    
+    }
+    create_vector_agent_ids();
 
 }

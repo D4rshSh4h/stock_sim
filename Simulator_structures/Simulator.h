@@ -22,23 +22,30 @@ class Simulator : public TradeObserver {
         void log_volume(); //Adds current volume to volume_time_log with current time as key
         void update_price(float lowest_ask, float highest_bid);
         Orderbook& get_buy_book();
-        Orderbook& get_sell_book();
+        Orderbook& get_sell_book(); 
         void simulator_start(int no_agents = 10);
         Agent* get_agent(int id);
         void simulator_buy_trade(Order& order);
         void simulator_sell_trade(Order& order); 
         void on_trade_agent_state(const Order& buy_order, const Order& sell_order, float price, float spread) override; 
+        void create_vector_agent_ids(); 
+        std::vector<int> shuffle_agent_ids();
+        void reset_volume();
+        
     private:
         float current_price;
         int volume;
         int time;
         float total_cash; //Total cash circulating in system
         int total_shares; //Total shares circulating in system
+        float best_bid;
+        float best_ask;
         Orderbook buy_book;
         Orderbook sell_book;
         std::map<int, int> volume_time_log; // maps time to volume for that time step <int time, int volume>
         std::map<int, float> price_time_log; // maps time to price for that time step <int time, float price>
-        //TODO need to find a way to randomly iterate through agents to generate orders
+        
+        std::vector<int> agent_ids; // Vector to store agent IDs for random iteration
         std::unordered_map<int, std::unique_ptr<Agent>> agents; // maps agent id to agent object <int id, Agent agent>
 
 };

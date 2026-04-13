@@ -1,6 +1,5 @@
 //Handles logic for executing trades and updating the orderbook accordingly
 #include "trades.h"
-#include "../Simulator_structures/TradeObserver.h"
 #include <iostream>
 #include <fstream>
 
@@ -85,9 +84,10 @@ void sweep_book(Orderbook& buy, Orderbook& sell) {
             if (!buy_order.has_value() || !sell_order.has_value()) break;
 
             float spread = calculate_spread(*buy_order, *sell_order);
-            log_trade(*buy_order, *sell_order, lowest_sell_price, spread);
+            float traded_price = (highest_buy_price + lowest_sell_price) / 2.0; // Midpoint price for the trade
+            log_trade(*buy_order, *sell_order, traded_price, spread);
             buy.removeOrder(*buy_order);
-            sell.removeOrder(*sell_order);
+            sell.removeOrder(*sell_order);  
             // remove break here when handling multiple trades
         } else {
             break;
@@ -125,14 +125,14 @@ void prepare_file(void) {
 }
 
 void log_trade(Order& buyer, Order& seller, float price, float spread) {
-    prepare_file(); //TODO check logic
+    //prepare_file(); TODO check logic
     if(trade_observer){
         trade_observer->on_trade_agent_state(buyer, seller, price, spread);
     }
     else{
         std::cout << "No trade observer set. Unable to update agent states." << std::endl;
     }
-    std::ofstream log_file("trade_log.csv",      std::ios::app);
+    std::ofstream log_file("../trade_log.csv",      std::ios::app);
     if (log_file.is_open()) {
         log_file << buyer.getId() 
                  << ", " << seller.getId() 
