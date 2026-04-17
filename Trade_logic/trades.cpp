@@ -8,10 +8,13 @@ void set_trade_observer(TradeObserver* observer) {
     trade_observer = observer;
 }
 
+/*
 Order set_order(float price, int id, int type) {
     Order order(price, id, type);
     return order;
 }
+*/
+
 
 float calculate_spread(Order& buy_order, Order& sell_order) {
     return sell_order.getPrice() - buy_order.getPrice();
@@ -100,6 +103,12 @@ bool buy_trade(Order& order, Orderbook& buy, Orderbook& sell) {
     //If trade not matched add to orderbook
     if (!match_orders(order, buy, sell)) {
         buy.addOrder(order);
+        if(trade_observer){
+        trade_observer->update_time_order_index(order);
+        }
+        else{
+            std::cout << "No trade observer set. Unable to update agent states." << std::endl;
+        }
         return false;
     }
     return true;
@@ -109,23 +118,37 @@ bool sell_trade(Order& order, Orderbook& buy, Orderbook& sell) {
     //If trade not matched add to orderbook
     if (!match_orders(order, buy, sell)) {
         sell.addOrder(order);
+        if(trade_observer){
+        trade_observer->update_time_order_index(order);
+        }
+        else{
+            std::cout << "No trade observer set. Unable to update agent states." << std::endl;
+        }
         return false;
     }
     return true;
 }
 
 void prepare_file(void) { 
-    std::ofstream log_file("trade_log.csv", std::ios::trunc);
-    if (log_file.is_open()) {
-        log_file << "Buyer ID, Seller ID, Price, Spread" << std::endl;
-        log_file.close();
+    std::ofstream log_trade_file("trade_log.csv", std::ios::trunc);
+    if (log_trade_file.is_open()) {
+        log_trade_file << "Buyer ID, Seller ID, Price, Spread" << std::endl;
+        log_trade_file.close();
     } else {
         std::cout << "Unable to initialize trade log file." << std::endl;
+    }
+
+    std::ofstream log_volume_file("volume_log.csv", std::ios::trunc);
+    if (log_volume_file.is_open()) {
+        log_volume_file << "Time, Volume" << std::endl;
+        log_volume_file.close();
+    } else {
+        std::cout << "Unable to initialize volume log file." << std::endl;
     }
 }
 
 void log_trade(Order& buyer, Order& seller, float price, float spread) {
-    //prepare_file(); TODO check logic
+    
     if(trade_observer){
         trade_observer->on_trade_agent_state(buyer, seller, price, spread);
     }

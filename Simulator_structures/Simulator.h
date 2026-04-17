@@ -28,9 +28,13 @@ class Simulator : public TradeObserver {
         void simulator_buy_trade(Order& order);
         void simulator_sell_trade(Order& order); 
         void on_trade_agent_state(const Order& buy_order, const Order& sell_order, float price, float spread) override; 
+        void update_time_order_index(const Order& order) override;
         void create_vector_agent_ids(); 
         std::vector<int> shuffle_agent_ids();
         void reset_volume();
+        std::map<int, int> get_volume_time_log();
+        int get_current_time() const;
+        void find_order_timeouts(int timeout_duration = 5);
         
     private:
         float current_price;
@@ -47,6 +51,7 @@ class Simulator : public TradeObserver {
         
         std::vector<int> agent_ids; // Vector to store agent IDs for random iteration
         std::unordered_map<int, std::unique_ptr<Agent>> agents; // maps agent id to agent object <int id, Agent agent>
+        std::unordered_map<int, std::vector<Order>> order_time_index; // maps time to vector of orders for that time step <int time, vector<Order> orders>
 
 };
 

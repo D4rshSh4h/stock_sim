@@ -28,7 +28,7 @@ class Agent{
         void run_agent();
         void change_state(char new_state, float added_cash, int added_shares);
         int get_id() const;
-        
+        char get_state() const;
     
 }; 
 

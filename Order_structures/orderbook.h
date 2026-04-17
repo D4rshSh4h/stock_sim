@@ -5,6 +5,7 @@
 #include <map>
 #include <optional>
 #include <queue>
+#include <deque>
 
 class Orderbook {
 public:
@@ -18,10 +19,11 @@ public:
   bool is_empty() const;
   float find_lowest_price() const;
   float find_highest_price() const;
-  std::optional<Order> get_order(float price) const;
+  std::optional<Order> get_order(float price);
+  std::deque<Order>* get_orders_at_price(float price);
 
 private:
-  std::map<float, std::queue<Order>> orderbook;
+  std::map<float, std::deque<Order>> orderbook;
 };
 
 #endif // ORDERBOOK_H

@@ -1,4 +1,4 @@
-#TODO need to make plotter
+
 import pandas as pd
 import matplotlib.pyplot as plt
 

@@ -1,14 +1,16 @@
-//TODO need to create main
+#include "file_handler.h"
 #include "Simulator_structures/Agent.h"
 #include "Trade_logic/trades.h"
 #include <iostream>
 
 //Constants
-const int NO_AGENTS = 100;
+const int NO_AGENTS = 50;
 const int TICKS = 1000;
 const float INITIAL_PRICE = 100.0;
-const float TOTAL_CASH = 100000.0;
+const float TOTAL_CASH = 200000.0;
 const int TOTAL_SHARES = 1000;
+const int TIMEOUT_DURATION = 10; // Time steps after which an order will timeout if not filled
+//TODO need to create a mechanism to add cash mid simulation
 
 int main(){
     //Setup
@@ -32,12 +34,15 @@ int main(){
                 agent->run_agent();
             }
         }
+        
         sweep_book(buy_book_ref, sell_book_ref);
+        simulator.find_order_timeouts(TIMEOUT_DURATION);
         
         //simulator.log_price();
         simulator.log_volume();
         simulator.reset_volume();
     }
+    print_volume(simulator.get_volume_time_log());
 }
 
 

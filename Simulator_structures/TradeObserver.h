@@ -5,6 +5,7 @@
 class TradeObserver{
     public:
         virtual void on_trade_agent_state(const Order& buy_order, const Order& sell_order, float price, float spread) = 0;
+        virtual void update_time_order_index(const Order& order) = 0;
         virtual ~TradeObserver() = default;
 };
 

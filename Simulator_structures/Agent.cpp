@@ -3,7 +3,7 @@
 #include <iostream>
 //#include <stdexcept>
 
-const float RANGE = 0.1; //Range for random price generation in prediction engine
+const float RANGE = 0.05; //Range for random price generation in prediction engine
 
 Agent::Agent(Simulator& sim, int id, float cash, int shares, char state) : simulator(sim), id(id), cash(cash), shares(shares), state(state) {}
 Agent::~Agent() {}
@@ -26,7 +26,7 @@ std::optional<Order> Agent::agent_buy(float mkt_price) {
     if (cash < price){
         return std::nullopt; // Not enough cash to buy
     }
-    return std::make_optional(Order(price, id, 0));
+    return std::make_optional(Order(price, id, 0, simulator.get_current_time(), 0));
 }
 
 std::optional<Order> Agent::agent_sell(float mkt_price) {
@@ -36,7 +36,7 @@ std::optional<Order> Agent::agent_sell(float mkt_price) {
     if(shares < 1){
         return std::nullopt; // Not enough shares to sell
     }
-    return std::make_optional(Order(price, id, 1));
+    return std::make_optional(Order(price, id, 1, simulator.get_current_time(), 0));
 }
 
 std::optional<Order> Agent::prediction_engine() {
@@ -105,6 +105,7 @@ void Agent::place_order(Order& order) {
     }
 } 
 
+//TODO: need to create a function where an order can time out
 void Agent::run_agent() {
     auto order_opt = prediction_engine();
     if (order_opt.has_value()) {
@@ -126,4 +127,8 @@ void Agent::change_state(char new_state, float added_cash, int added_shares) {
 
 int Agent::get_id() const {
     return id;
+}
+
+char Agent::get_state() const {
+    return state;
 }

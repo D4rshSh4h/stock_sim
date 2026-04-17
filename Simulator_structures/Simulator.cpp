@@ -30,6 +30,14 @@ float Simulator::get_price(int time) const {
     return -1.0; // Return -1 or throw an exception if no price data is found for the given time
 }
 
+std::map<int, int> Simulator::get_volume_time_log() {
+    return volume_time_log;
+}
+
+int Simulator::get_current_time() const {
+    return time;
+}
+
 void Simulator::update_time() {time++;}
 
 Orderbook& Simulator::get_buy_book() {
@@ -109,6 +117,60 @@ void Simulator::on_trade_agent_state(const Order& buy_order, const Order& sell_o
         seller->change_state('l', price, 0); // Seller receives cash + changed state to perfectly liquid
     }
     volume++;
+}
+
+void Simulator::update_time_order_index(const Order& order) {
+    order_time_index[time].push_back(order);
+}
+
+void Simulator::find_order_timeouts(int timeout_duration) {
+    int threshold_time = time - timeout_duration;
+    if (threshold_time < 1) {
+        return; 
+    }
+    auto it = order_time_index.find(threshold_time);
+    if (it != order_time_index.end()) {
+        std::vector<Order>& orders_to_timeout = it->second;
+        for (Order& order : orders_to_timeout){
+            if(order.getTradeType() == 0){ //Buy order
+                std::deque<Order>* orders_at_price = buy_book.get_orders_at_price(order.getPrice());
+                if(orders_at_price == nullptr){
+                    continue; 
+                }
+                auto order_it = std::find_if(orders_at_price->begin(), orders_at_price->end(), [&order](const Order& o) {
+                    return o.getId() == order.getId() && o.getTimePlaced() == order.getTimePlaced();
+                });
+                if (order_it != orders_at_price->end()) {
+                    order_it->timeout_order();
+                    //return cash for buying order back to agent
+                    Agent* agent_change = get_agent(order.getId());
+                    if(agent_change){
+                        agent_change->change_state(agent_change->get_state(), order.getPrice(), 0); // Return cash to agent + change state to holding
+                    }
+                }
+            }
+            if(order.getTradeType() == 1){ //Sell order
+                std::deque<Order>* orders_at_price = sell_book.get_orders_at_price(order.getPrice());
+                if(orders_at_price == nullptr){
+                    continue; 
+                }
+                auto order_it = std::find_if(orders_at_price->begin(), orders_at_price->end(), [&order](const Order& o) {
+                    return o.getId() == order.getId() && o.getTimePlaced() == order.getTimePlaced();
+                });
+                if (order_it != orders_at_price->end()) {
+                    order_it->timeout_order();
+                    //return shares for selling order back to agent
+                    Agent* agent_change = get_agent(order.getId());
+                    if(agent_change){
+                        agent_change->change_state(agent_change->get_state(), 0, 1); // Return shares to agent + change state to holding
+                    }
+                }
+            }
+        }
+    }
+    else {
+        return; 
+    }
 }
 
 void Simulator::create_vector_agent_ids() {

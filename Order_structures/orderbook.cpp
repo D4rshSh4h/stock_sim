@@ -5,7 +5,7 @@ Orderbook::Orderbook() {}
 Orderbook::~Orderbook() {}
 
 void Orderbook::addOrder(const Order &order) {
-    orderbook[order.getPrice()].push(order);
+    orderbook[order.getPrice()].push_back(order);
 }
 void Orderbook::removePrice(const Order &order) {
     float price_remove = order.getPrice();
@@ -20,7 +20,7 @@ void Orderbook::removePrice(const Order &order) {
 void Orderbook::removeOrder(const Order &order) {
     float price_index = order.getPrice();
     if(!orderbook[price_index].empty()){
-        orderbook[price_index].pop();
+        orderbook[price_index].pop_front();
         if(orderbook[price_index].empty()){
             this -> removePrice(order);
         }
@@ -49,14 +49,34 @@ float Orderbook::find_highest_price() const {
     return orderbook.rbegin()->first; // The highest price is the last key in the map
 }
 
-std::optional<Order> Orderbook::get_order(float price) const {
+std::optional<Order> Orderbook::get_order(float price) {
     auto it = orderbook.find(price);
-    if (it != orderbook.end() && !it->second.empty()) {
-        return it->second.front(); // Return the order at the front of the queue for the given price
+    if(it == orderbook.end() || it->second.empty()){
+        return std::nullopt; // Return an empty optional if no orders are found at this price
     }
-    return std::nullopt; // Return an empty optional if no orders are found at this price
+    else{
+        Order order_collected = it->second.front();
+        if(order_collected.getStatus() == 0){
+            return order_collected;
+        }
+        else{
+           removeOrder(order_collected);
+           return get_order(price);
+
+        }   
+    }
+    return std::nullopt; 
+    
 }
 
 int Orderbook::get_size() const {
     return orderbook.size();
+}
+
+std::deque<Order>* Orderbook::get_orders_at_price(float price){
+    auto it = orderbook.find(price);
+    if (it != orderbook.end()) {
+        return &it->second; // Return the deque of orders for the given price
+    }
+    return nullptr; // Return a null pointer if no orders are found at this price
 }
