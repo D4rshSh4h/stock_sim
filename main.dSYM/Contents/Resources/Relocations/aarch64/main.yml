@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/darsh/Desktop/stock_sim/main'
+relocations:     []
+...
