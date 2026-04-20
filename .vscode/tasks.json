@@ -26,7 +26,7 @@
             ]
         },
         {
-            "type": "shell", //To change when debugging
+            "type": "cppbuild", //To change when debugging
             "label": "C/C++: g++.exe build active file",
             "command": "C:\\msys64\\mingw64\\bin\\g++.exe",
             "args": [

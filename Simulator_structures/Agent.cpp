@@ -4,7 +4,7 @@
 // #include <stdexcept>
 
 const float RANGE =
-    0.025; // Range for random price generation in prediction engine
+    0.5; // Range for random price generation in prediction engine
 
 Agent::Agent(Simulator &sim, int id, float cash, int shares, char state)
     : simulator(sim), id(id), cash(cash), shares(shares), state(state) {}
@@ -14,27 +14,23 @@ Agent::~Agent() {}
 // for the prediction engine
 bool Agent::decide2() {
   std::bernoulli_distribution dist(0.5); // 50% chance to return true or false
-  return dist(get_rng());                // Returns true or false
+  return dist(get_rng());               
 }
 int Agent::decide3() {
   std::uniform_int_distribution<> dist(0, 2); // 0, 1, or 2
-  return dist(get_rng());                     // Returns 0, 1, or 2
+  return dist(get_rng());                    
 }
 
 std::optional<Order> Agent::agent_buy(float mkt_price) {
-  float delta;
   std::uniform_real_distribution<float> price_dist;
-  if (mkt_price == 0.00) {
-    price_dist = std::uniform_real_distribution<float>(1, RANGE);
-  } else {
-    delta = RANGE * mkt_price;
-    if (mkt_price - delta <= 0.00) {
-      price_dist = std::uniform_real_distribution<float>(1, RANGE);
+    float delta = RANGE * mkt_price;
+   if (mkt_price == 0.00) {
+      price_dist = std::uniform_real_distribution<float>(0, RANGE);
     } else {
       price_dist = std::uniform_real_distribution<float>(mkt_price - delta,
                                                          mkt_price + delta);
     }
-  }
+  
   float price = price_dist(get_rng());
   if (cash < price) {
     return std::nullopt; // Not enough cash to buy
@@ -44,19 +40,14 @@ std::optional<Order> Agent::agent_buy(float mkt_price) {
 }
 
 std::optional<Order> Agent::agent_sell(float mkt_price) {
-  float delta;
   std::uniform_real_distribution<float> price_dist;
-  if (mkt_price == 0.00) {
-    price_dist = std::uniform_real_distribution<float>(1, RANGE);
-  } else {
-    delta = RANGE * mkt_price;
-    if (mkt_price - delta <= 0.00) {
-      price_dist = std::uniform_real_distribution<float>(1, RANGE);
+    float delta = RANGE * mkt_price;
+    if (mkt_price == 0.00) {
+     price_dist = std::uniform_real_distribution<float>(0, RANGE);
     } else {
       price_dist = std::uniform_real_distribution<float>(mkt_price - delta,
                                                          mkt_price + delta);
-    }
-  }
+   }
   float price = price_dist(get_rng());
   if (shares < 1) {
     return std::nullopt; // Not enough shares to sell

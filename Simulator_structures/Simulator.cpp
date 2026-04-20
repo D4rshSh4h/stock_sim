@@ -8,6 +8,8 @@
 #include <numeric>
 #include <iostream>
 
+const float BUFFER = 10.0; // Buffer for price generation in prediction engine when current price is 0
+
 Simulator::Simulator(float initial_price, float total_cash, int total_shares) : current_price(initial_price), volume(0), time(0), total_cash(total_cash), total_shares(total_shares) {}
 Simulator::~Simulator() {}  
 auto& gen = get_rng(); // Random number generator for the simulator
@@ -105,13 +107,22 @@ void Simulator::on_trade_agent_state(const Order& buy_order, const Order& sell_o
     int buy_id = buy_order.getId();
     int sell_id = sell_order.getId();
 
-    current_price = price;
+    if(price == 0.00){
+        current_price = price + BUFFER;
+    }
+    else{
+        current_price = price;
+    }
+    
+   
+    
+
 
     Agent* buyer = get_agent(buy_id);
     Agent* seller = get_agent(sell_id);
 
     if (buyer) {
-        buyer->change_state('h', 0, 1); // Buyer receives 1 share + changed state to holding
+        buyer->change_state('h', spread, 1); // Buyer receives 1 share + changed state to holding
     }
     if (seller) {
         seller->change_state('l', price, 0); // Seller receives cash + changed state to perfectly liquid

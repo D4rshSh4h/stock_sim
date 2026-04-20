@@ -17,7 +17,7 @@ Order set_order(float price, int id, int type) {
 
 
 float calculate_spread(Order& buy_order, Order& sell_order) {
-    return sell_order.getPrice() - buy_order.getPrice();
+    return  buy_order.getPrice() - sell_order.getPrice();
 }
 
 // Matches a single incoming order against the opposite book
