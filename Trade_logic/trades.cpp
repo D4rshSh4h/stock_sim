@@ -1,44 +1,38 @@
-//Handles logic for executing trades and updating the orderbook accordingly
 #include "trades.h"
+#include "TradeLogger.h"
+#include "../config.h"
 #include <iostream>
 #include <fstream>
 
-TradeObserver* trade_observer = nullptr; // Global pointer to the trade observer
-void set_trade_observer(TradeObserver* observer) {
-    trade_observer = observer;
+MatchingEngine::MatchingEngine(TradeObserver* observer) : observer_(observer) {}
+
+float MatchingEngine::calculate_spread(Order& buy_order, Order& sell_order) {
+    return int_to_float_price(buy_order.getPrice() - sell_order.getPrice());
 }
 
-/*
-Order set_order(float price, int id, int type) {
-    Order order(price, id, type);
-    return order;
-}
-*/
-
-
-float calculate_spread(Order& buy_order, Order& sell_order) {
-    return  buy_order.getPrice() - sell_order.getPrice();
-}
-
-// Matches a single incoming order against the opposite book
-bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
-    int trade_type = order.getTradeType();
-    float order_price = order.getPrice(); 
+bool MatchingEngine::match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
+    OrderType trade_type = order.getTradeType();
+    int order_price = order.getPrice(); 
     bool matched = false;
     
-    if(trade_type == 0){
+    if(trade_type == OrderType::Buy){
         while(!(sell.is_empty())){
-            float lowest_sell_price = sell.find_lowest_price();
-            if(lowest_sell_price == -1){
+            auto lowest_sell_opt = sell.best_ask_price();
+            if(!lowest_sell_opt.has_value()){
                 return false;
             }
+            int lowest_sell_price = *lowest_sell_opt;
             if (lowest_sell_price <= order_price){
                 auto sell_order = sell.get_order(lowest_sell_price);
                 if (!sell_order.has_value()){
                     return false;
                 }
                 float spread = calculate_spread(order, *sell_order);
-                log_trade(order, *sell_order, lowest_sell_price, spread);
+                log_trade(order, *sell_order, int_to_float_price(lowest_sell_price), spread);
+                auto sell_orders = sell.get_orders_at_price(lowest_sell_price);
+                if (sell_orders && !sell_orders->empty()) {
+                    sell_orders->front()->fill_order();
+                }
                 sell.removeOrder(*sell_order);
                 matched = true;
                 break; // incoming order fully filled, stop
@@ -48,19 +42,24 @@ bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
         }
     }
 
-    if(trade_type == 1){
+    if(trade_type == OrderType::Sell){
         while(!(buy.is_empty())){
-            float highest_buy_price = buy.find_highest_price();
-            if(highest_buy_price == -1){
+            auto highest_buy_opt = buy.best_bid_price();
+            if(!highest_buy_opt.has_value()){
                 return false;
             }
+            int highest_buy_price = *highest_buy_opt;
             if (highest_buy_price >= order_price){
                 auto buy_order = buy.get_order(highest_buy_price);
                 if (!buy_order.has_value()){
                     return false;
                 }
                 float spread = calculate_spread(*buy_order, order);
-                log_trade(*buy_order, order, highest_buy_price, spread);
+                log_trade(*buy_order, order, int_to_float_price(highest_buy_price), spread);
+                auto buy_orders = buy.get_orders_at_price(highest_buy_price);
+                if (buy_orders && !buy_orders->empty()) {
+                    buy_orders->front()->fill_order();
+                }
                 buy.removeOrder(*buy_order);
                 matched = true;
                 break; // incoming order fully filled, stop
@@ -72,39 +71,13 @@ bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
     return matched;
 }
 
-// Sweeps resting orders in both books and matches them against each other
-void sweep_book(Orderbook& buy, Orderbook& sell) {
-    while (!buy.is_empty() && !sell.is_empty()) {
-        float highest_buy_price = buy.find_highest_price();
-        float lowest_sell_price = sell.find_lowest_price();
-
-        if (highest_buy_price == -1 || lowest_sell_price == -1) break;
-
-        if (highest_buy_price >= lowest_sell_price) {
-            auto buy_order = buy.get_order(highest_buy_price);
-            auto sell_order = sell.get_order(lowest_sell_price);
-
-            if (!buy_order.has_value() || !sell_order.has_value()) break;
-
-            float spread = calculate_spread(*buy_order, *sell_order);
-            float traded_price = (highest_buy_price + lowest_sell_price) / 2.0; // Midpoint price for the trade
-            log_trade(*buy_order, *sell_order, traded_price, spread);
-            buy.removeOrder(*buy_order);
-            sell.removeOrder(*sell_order);  
-            // remove break here when handling multiple trades
-        } else {
-            break;
-        }
-    }
-}
-
 //Receives a new incoming order, Decides what to do with it, Calls the matching logic, If unmatched, rests the order in the book
-bool buy_trade(Order& order, Orderbook& buy, Orderbook& sell) { 
+bool MatchingEngine::execute_buy_order(Order& order, Orderbook& buy, Orderbook& sell) { 
     //If trade not matched add to orderbook
     if (!match_orders(order, buy, sell)) {
-        buy.addOrder(order);
-        if(trade_observer){
-        trade_observer->update_time_order_index(order);
+        std::shared_ptr<Order> order_ptr = buy.addOrder(order);
+        if(observer_){
+        observer_->track_resting_order_for_timeout(order_ptr);
         }
         else{
             std::cout << "No trade observer set. Unable to update agent states." << std::endl;
@@ -114,12 +87,12 @@ bool buy_trade(Order& order, Orderbook& buy, Orderbook& sell) {
     return true;
 }
 
-bool sell_trade(Order& order, Orderbook& buy, Orderbook& sell) {
+bool MatchingEngine::execute_sell_order(Order& order, Orderbook& buy, Orderbook& sell) {
     //If trade not matched add to orderbook
     if (!match_orders(order, buy, sell)) {
-        sell.addOrder(order);
-        if(trade_observer){
-        trade_observer->update_time_order_index(order);
+        std::shared_ptr<Order> order_ptr = sell.addOrder(order);
+        if(observer_){
+        observer_->track_resting_order_for_timeout(order_ptr);
         }
         else{
             std::cout << "No trade observer set. Unable to update agent states." << std::endl;
@@ -130,13 +103,7 @@ bool sell_trade(Order& order, Orderbook& buy, Orderbook& sell) {
 }
 
 void prepare_file(void) { 
-    std::ofstream log_trade_file("trade_log.csv", std::ios::trunc);
-    if (log_trade_file.is_open()) {
-        log_trade_file << "Buyer ID, Seller ID, Price, Spread" << std::endl;
-        log_trade_file.close();
-    } else {
-        std::cout << "Unable to initialize trade log file." << std::endl;
-    }
+    TradeLogger::instance().init("trade_log.csv");
 
     std::ofstream log_volume_file("volume_log.csv", std::ios::trunc);
     if (log_volume_file.is_open()) {
@@ -147,25 +114,76 @@ void prepare_file(void) {
     }
 }
 
-void log_trade(Order& buyer, Order& seller, float price, float spread) {
-    
-    if(trade_observer){
-        trade_observer->on_trade_agent_state(buyer, seller, price, spread);
+void MatchingEngine::log_trade(Order& buyer, Order& seller, float price, float spread) {
+    if(observer_){
+        observer_->on_trade_executed(buyer, seller, price, spread);
     }
     else{
         std::cout << "No trade observer set. Unable to update agent states." << std::endl;
     }
-    //std::cout << "Log trade called" << std::endl;
-    std::ofstream log_file("trade_log.csv",      std::ios::app);
-    if (log_file.is_open()) {
-        log_file << buyer.getId() 
-                 << ", " << seller.getId() 
-                 << ", " << price 
-                 << ", " << spread 
-                 << std::endl;
-        log_file.close();
-    } else {
-        std::cout << "Unable to open trade log file." << std::endl;
+
+    TradeLogger::instance().log(buyer.getId(), seller.getId(), price, spread);
+}
+
+void MatchingEngine::sweep_orderbooks(Orderbook& buy, Orderbook& sell) {
+    while (!buy.is_empty() && !sell.is_empty()) {
+        auto highest_buy_opt = buy.best_bid_price();
+        auto lowest_sell_opt = sell.best_ask_price();
+        if (!highest_buy_opt.has_value() || !lowest_sell_opt.has_value()) {
+            break;
+        }
+        int highest_buy_price = *highest_buy_opt;
+        int lowest_sell_price = *lowest_sell_opt;
+
+        if (highest_buy_price >= lowest_sell_price) {
+            auto buy_order = buy.get_order(highest_buy_price);
+            auto sell_order = sell.get_order(lowest_sell_price);
+
+            if (!buy_order.has_value() || !sell_order.has_value()) break;
+
+            float spread = calculate_spread(*buy_order, *sell_order);
+            float traded_price = int_to_float_price((highest_buy_price + lowest_sell_price) / 2);
+            log_trade(*buy_order, *sell_order, traded_price, spread);
+            auto buy_orders = buy.get_orders_at_price(highest_buy_price);
+            if (buy_orders && !buy_orders->empty()) {
+                buy_orders->front()->fill_order();
+            }
+            auto sell_orders = sell.get_orders_at_price(lowest_sell_price);
+            if (sell_orders && !sell_orders->empty()) {
+                sell_orders->front()->fill_order();
+            }
+            buy.removeOrder(*buy_order);
+            sell.removeOrder(*sell_order);
+        } else {
+            break;
+        }
     }
+}
+
+bool buy_trade(Order &order, Orderbook &buy, Orderbook &sell, TradeObserver& observer) {
+    MatchingEngine engine(&observer);
+    return engine.execute_buy_order(order, buy, sell);
+}
+
+bool sell_trade(Order &order, Orderbook &buy, Orderbook &sell, TradeObserver& observer) {
+    MatchingEngine engine(&observer);
+    return engine.execute_sell_order(order, buy, sell);
+}
+
+void sweep_book(Orderbook& buy, Orderbook& sell, TradeObserver& observer) {
+    MatchingEngine engine(&observer);
+    engine.sweep_orderbooks(buy, sell);
+}
+
+bool MatchingEngine::buy_trade(Order& order, Orderbook& buy, Orderbook& sell) {
+    return execute_buy_order(order, buy, sell);
+}
+
+bool MatchingEngine::sell_trade(Order& order, Orderbook& buy, Orderbook& sell) {
+    return execute_sell_order(order, buy, sell);
+}
+
+void MatchingEngine::sweep_book(Orderbook& buy, Orderbook& sell) {
+    sweep_orderbooks(buy, sell);
 }
 
