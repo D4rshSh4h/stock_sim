@@ -4,10 +4,13 @@
 
 #include "../Order_structures/orderbook.h"
 #include "DecisionEngine.h"
+#include "AgentBootstrapper.h"
+#include "OrderTimeoutService.h"
+#include "TradeSettlementService.h"
+#include "../Trade_logic/MatchingGateway.h"
 #include "TradeObserver.h"
 #include <unordered_map>
 #include <memory>
-#include <queue>
 
 class Agent;
  
@@ -57,15 +60,13 @@ class Simulator : public TradeObserver {
         
         std::vector<int> agent_ids; // Vector to store agent IDs for random iteration
         std::unordered_map<int, std::unique_ptr<Agent>> agents; // maps agent id to agent object <int id, Agent agent>
-        std::queue<std::weak_ptr<Order>> timeout_queue;
         RandomDecisionEngine random_decision_engine;
+        AgentBootstrapper agent_bootstrapper;
+        OrderTimeoutService timeout_service;
+        TradeSettlementService trade_settlement_service;
+        MatchingGateway matching_gateway;
 
-        size_t choose_split_index(int no_agents);
         const IAgentDecisionEngine& select_engine_for_agent(int agent_id) const;
-        bool allocate_cash_agents(std::vector<std::unique_ptr<Agent>>& temp_agent_vector, int no_cash_agents);
-        void allocate_share_agents(std::vector<std::unique_ptr<Agent>>& temp_agent_vector, int no_agents, size_t split_index);
-        void register_agents(std::vector<std::unique_ptr<Agent>>& temp_agent_vector);
-
 };
 
 #endif // SIMULATOR_H
