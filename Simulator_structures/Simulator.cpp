@@ -57,7 +57,7 @@ void Simulator::reset_volume() {
     volume = 0;
 }
 
-void Simulator::log_price() { //TODO log into a file for price and volume over time, also log bid-ask spread over time
+void Simulator::log_price() { 
     price_time_log[time] = current_price;
 }   
 
@@ -79,11 +79,11 @@ Agent* Simulator::get_agent(int id) {
     auto it = agents.find(id);
     if (it != agents.end()) {
         return it->second.get();
-    }
+    }  
     return nullptr; // Return nullptr if no agent is found with the given id
 }
 
-void Simulator::simulator_buy_trade(Order& order) { //TODO logic for mid price/fair price
+void Simulator::simulator_buy_trade(Order& order) { 
     buy_trade(order, buy_book, sell_book, *this);
     /*
     float p = order.getPrice();
@@ -105,7 +105,10 @@ void Simulator::simulator_sell_trade(Order& order) {
     
 } 
 
-void Simulator::on_trade_executed(const Order& buy_order, const Order& sell_order, float price, float spread) {
+
+
+void Simulator::on_trade_agent_state(const Order& buy_order, const Order& sell_order, float price, float spread) {
+    //on_trade_executed(buy_order, sell_order, price, spread);
     int buy_id = buy_order.getId();
     int sell_id = sell_order.getId();
 
@@ -115,10 +118,6 @@ void Simulator::on_trade_executed(const Order& buy_order, const Order& sell_orde
     else{
         current_price = price;
     }
-    
-   
-    
-
 
     Agent* buyer = get_agent(buy_id);
     Agent* seller = get_agent(sell_id);
@@ -132,21 +131,19 @@ void Simulator::on_trade_executed(const Order& buy_order, const Order& sell_orde
     volume++;
 }
 
-void Simulator::on_trade_agent_state(const Order& buy_order, const Order& sell_order, float price, float spread) {
-    on_trade_executed(buy_order, sell_order, price, spread);
-}
 
-void Simulator::track_resting_order_for_timeout(std::shared_ptr<Order> order_ptr) {
+
+void Simulator::update_time_order_index(std::shared_ptr<Order> order_ptr) {
+    //track_resting_order_for_timeout(order_ptr);
     if (order_ptr) {
         timeout_queue.push(order_ptr);
     }
 }
 
-void Simulator::update_time_order_index(std::shared_ptr<Order> order_ptr) {
-    track_resting_order_for_timeout(order_ptr);
-}
 
-void Simulator::expire_timed_out_orders(int timeout_duration) {
+
+void Simulator::find_order_timeouts(int timeout_duration) {
+    //expire_timed_out_orders(timeout_duration);
     while (!timeout_queue.empty()) {
         std::shared_ptr<Order> order = timeout_queue.front().lock();
         if (!order) {
@@ -173,10 +170,6 @@ void Simulator::expire_timed_out_orders(int timeout_duration) {
         }
         timeout_queue.pop();
     }
-}
-
-void Simulator::find_order_timeouts(int timeout_duration) {
-    expire_timed_out_orders(timeout_duration);
 }
 
 void Simulator::create_vector_agent_ids() {

@@ -28,8 +28,8 @@ class Simulator : public TradeObserver {
         Agent* get_agent(int id);
         void simulator_buy_trade(Order& order);
         void simulator_sell_trade(Order& order); 
-        void on_trade_executed(const Order& buy_order, const Order& sell_order, float price, float spread) override;
-        void track_resting_order_for_timeout(std::shared_ptr<Order> order_ptr) override;
+       // void on_trade_executed(const Order& buy_order, const Order& sell_order, float price, float spread) override;
+       // void track_resting_order_for_timeout(std::shared_ptr<Order> order_ptr) override;
         // Compatibility wrappers for existing names.
         void on_trade_agent_state(const Order& buy_order, const Order& sell_order, float price, float spread) override;
         void update_time_order_index(std::shared_ptr<Order> order_ptr) override;
@@ -66,6 +66,6 @@ class Simulator : public TradeObserver {
         void allocate_share_agents(std::vector<std::unique_ptr<Agent>>& temp_agent_vector, int no_agents, size_t split_index);
         void register_agents(std::vector<std::unique_ptr<Agent>>& temp_agent_vector);
 
-};
+};    
 
 #endif // SIMULATOR_H

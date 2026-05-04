@@ -4,13 +4,18 @@
 #include <iostream>
 #include <fstream>
 
-MatchingEngine::MatchingEngine(TradeObserver* observer) : observer_(observer) {}
 
-float MatchingEngine::calculate_spread(Order& buy_order, Order& sell_order) {
+
+TradeObserver* observer_ = nullptr;
+void set_trade_observer(TradeObserver* observer) {
+    observer_ = observer;
+}
+
+float calculate_spread(Order& buy_order, Order& sell_order) {
     return int_to_float_price(buy_order.getPrice() - sell_order.getPrice());
 }
 
-bool MatchingEngine::match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
+bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
     OrderType trade_type = order.getTradeType();
     int order_price = order.getPrice(); 
     bool matched = false;
@@ -72,12 +77,12 @@ bool MatchingEngine::match_orders(Order& order, Orderbook& buy, Orderbook& sell)
 }
 
 //Receives a new incoming order, Decides what to do with it, Calls the matching logic, If unmatched, rests the order in the book
-bool MatchingEngine::execute_buy_order(Order& order, Orderbook& buy, Orderbook& sell) { 
+bool execute_buy_order(Order& order, Orderbook& buy, Orderbook& sell) { 
     //If trade not matched add to orderbook
     if (!match_orders(order, buy, sell)) {
         std::shared_ptr<Order> order_ptr = buy.addOrder(order);
         if(observer_){
-        observer_->track_resting_order_for_timeout(order_ptr);
+        observer_->update_time_order_index(order_ptr);
         }
         else{
             std::cout << "No trade observer set. Unable to update agent states." << std::endl;
@@ -87,12 +92,12 @@ bool MatchingEngine::execute_buy_order(Order& order, Orderbook& buy, Orderbook& 
     return true;
 }
 
-bool MatchingEngine::execute_sell_order(Order& order, Orderbook& buy, Orderbook& sell) {
+bool execute_sell_order(Order& order, Orderbook& buy, Orderbook& sell) {
     //If trade not matched add to orderbook
     if (!match_orders(order, buy, sell)) {
         std::shared_ptr<Order> order_ptr = sell.addOrder(order);
         if(observer_){
-        observer_->track_resting_order_for_timeout(order_ptr);
+        observer_->update_time_order_index(order_ptr);
         }
         else{
             std::cout << "No trade observer set. Unable to update agent states." << std::endl;
@@ -114,9 +119,9 @@ void prepare_file(void) {
     }
 }
 
-void MatchingEngine::log_trade(Order& buyer, Order& seller, float price, float spread) {
+void log_trade(Order& buyer, Order& seller, float price, float spread) {
     if(observer_){
-        observer_->on_trade_executed(buyer, seller, price, spread);
+        observer_->on_trade_agent_state(buyer, seller, price, spread);
     }
     else{
         std::cout << "No trade observer set. Unable to update agent states." << std::endl;
@@ -125,7 +130,7 @@ void MatchingEngine::log_trade(Order& buyer, Order& seller, float price, float s
     TradeLogger::instance().log(buyer.getId(), seller.getId(), price, spread);
 }
 
-void MatchingEngine::sweep_orderbooks(Orderbook& buy, Orderbook& sell) {
+void sweep_orderbooks(Orderbook& buy, Orderbook& sell) {
     while (!buy.is_empty() && !sell.is_empty()) {
         auto highest_buy_opt = buy.best_bid_price();
         auto lowest_sell_opt = sell.best_ask_price();
@@ -161,29 +166,16 @@ void MatchingEngine::sweep_orderbooks(Orderbook& buy, Orderbook& sell) {
 }
 
 bool buy_trade(Order &order, Orderbook &buy, Orderbook &sell, TradeObserver& observer) {
-    MatchingEngine engine(&observer);
-    return engine.execute_buy_order(order, buy, sell);
-}
-
-bool sell_trade(Order &order, Orderbook &buy, Orderbook &sell, TradeObserver& observer) {
-    MatchingEngine engine(&observer);
-    return engine.execute_sell_order(order, buy, sell);
-}
-
-void sweep_book(Orderbook& buy, Orderbook& sell, TradeObserver& observer) {
-    MatchingEngine engine(&observer);
-    engine.sweep_orderbooks(buy, sell);
-}
-
-bool MatchingEngine::buy_trade(Order& order, Orderbook& buy, Orderbook& sell) {
     return execute_buy_order(order, buy, sell);
 }
 
-bool MatchingEngine::sell_trade(Order& order, Orderbook& buy, Orderbook& sell) {
+bool sell_trade(Order &order, Orderbook &buy, Orderbook &sell, TradeObserver& observer) {
     return execute_sell_order(order, buy, sell);
 }
 
-void MatchingEngine::sweep_book(Orderbook& buy, Orderbook& sell) {
+void sweep_book(Orderbook& buy, Orderbook& sell, TradeObserver& observer) {
     sweep_orderbooks(buy, sell);
 }
+
+
 

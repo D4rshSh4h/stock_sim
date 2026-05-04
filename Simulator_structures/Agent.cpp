@@ -21,7 +21,7 @@ void Agent::place_order(Order &order) {
   }
 }
 
-// TODO: need to create a function where an order can time out
+
 void Agent::run() {
   if (cash == 0 && shares == 0) {
     state = AgentState::Liquid;
@@ -46,11 +46,7 @@ void Agent::run() {
   }
 }
 
-void Agent::apply_state_change(AgentState new_state, float added_cash, int added_shares) {
-  state = new_state;
-  cash += added_cash;
-  shares += added_shares;
-}
+
 
 int Agent::get_id() const { return id; }
 
@@ -63,5 +59,8 @@ void Agent::run_agent() {
 }
 
 void Agent::change_state(AgentState new_state, float added_cash, int added_shares) {
-  apply_state_change(new_state, added_cash, added_shares);
+  //apply_state_change(new_state, added_cash, added_shares);
+  state = new_state;
+  cash += added_cash;
+  shares += added_shares;
 }

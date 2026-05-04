@@ -12,6 +12,7 @@ int main() {
   // Setup
   Simulator simulator(INITIAL_PRICE, TOTAL_CASH, TOTAL_SHARES);
   prepare_file();
+  set_trade_observer(&simulator);
   simulator.initialize_agents(NO_AGENTS);
   std::cout << "Finished prep starting sim" << std::endl;
 
@@ -31,7 +32,7 @@ int main() {
     }
 
     sweep_book(buy_book_ref, sell_book_ref, simulator);
-    simulator.expire_timed_out_orders(TIMEOUT_DURATION);
+    simulator.find_order_timeouts(TIMEOUT_DURATION);
 
     // simulator.log_price();
     simulator.log_volume();
