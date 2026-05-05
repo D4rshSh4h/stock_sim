@@ -12,8 +12,7 @@ int RandomDecisionEngine::decide3() const {
   return dist(get_rng());
 }
 
-std::optional<Order>
-RandomDecisionEngine::agent_buy(const AgentDecisionContext &ctx) const {
+std::optional<Order> RandomDecisionEngine::agent_buy(const AgentDecisionContext &ctx) const {
   std::uniform_real_distribution<float> price_dist;
   float delta = RANGE * ctx.current_price;
   if (ctx.current_price == 0.00f) {
@@ -29,11 +28,10 @@ RandomDecisionEngine::agent_buy(const AgentDecisionContext &ctx) const {
   }
   return std::make_optional(Order(float_to_int_price(price), ctx.agent_id,
                                   OrderType::Buy, ctx.current_time,
-                                  OrderStatus::Active));
+                                  OrderStatus::Active, 1));
 }
 
-std::optional<Order>
-RandomDecisionEngine::agent_sell(const AgentDecisionContext &ctx) const {
+std::optional<Order> RandomDecisionEngine::agent_sell(const AgentDecisionContext &ctx) const {
   std::uniform_real_distribution<float> price_dist;
   float delta = RANGE * ctx.current_price;
   if (ctx.current_price == 0.00f) {
@@ -49,11 +47,10 @@ RandomDecisionEngine::agent_sell(const AgentDecisionContext &ctx) const {
   }
   return std::make_optional(Order(float_to_int_price(price), ctx.agent_id,
                                   OrderType::Sell, ctx.current_time,
-                                  OrderStatus::Active));
+                                  OrderStatus::Active,1));
 }
 
-std::optional<Order>
-RandomDecisionEngine::decide_order(const AgentDecisionContext &ctx) const {
+std::optional<Order> RandomDecisionEngine::decide_order(const AgentDecisionContext &ctx) const {
   if (ctx.shares == 0) {
     bool decision = decide2();
     if (decision) {

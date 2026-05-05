@@ -107,8 +107,8 @@ void Simulator::simulator_sell_trade(Order& order) {
 
 
 
-void Simulator::on_trade_agent_state(const Order& buy_order, const Order& sell_order, float price, float spread) {
-    //on_trade_executed(buy_order, sell_order, price, spread);
+void Simulator::on_trade_agent_state(const Order& buy_order, const Order& sell_order, float price, float spread, int qty) {
+    //qty refers to the number of shares traded in this particular trade
     int buy_id = buy_order.getId();
     int sell_id = sell_order.getId();
 
@@ -123,12 +123,12 @@ void Simulator::on_trade_agent_state(const Order& buy_order, const Order& sell_o
     Agent* seller = get_agent(sell_id);
 
     if (buyer) {
-        buyer->change_state(AgentState::Holding, spread, 1); // Buyer receives 1 share + changed state to holding
+        buyer->change_state(AgentState::Holding, spread, qty); // Buyer receives qty shares + changed state to holding
     }
     if (seller) {
-        seller->change_state(AgentState::Liquid, price, 0); // Seller receives cash + changed state to perfectly liquid
+        seller->change_state(AgentState::Liquid, price*qty, 0); // Seller receives cash + changed state to perfectly liquid
     }
-    volume++;
+    volume += qty;
 }
 
 
@@ -139,7 +139,7 @@ void Simulator::update_time_order_index(std::shared_ptr<Order> order_ptr) {
         timeout_queue.push(order_ptr);
     }
 }
-
+ 
 
 
 void Simulator::find_order_timeouts(int timeout_duration) {
@@ -162,10 +162,11 @@ void Simulator::find_order_timeouts(int timeout_duration) {
         order->cancel_order();
         Agent* agent_change = get_agent(order->getId());
         if (agent_change) {
+            int order_qty = order->getQty(); //Qty of shares of order in orderbook remaining
             if(order->getTradeType() == OrderType::Buy){
-                agent_change->change_state(agent_change->get_state(), int_to_float_price(order->getPrice()), 0);
+                agent_change->change_state(agent_change->get_state(), int_to_float_price(order->getPrice())*order_qty, 0);
             } else {
-                agent_change->change_state(agent_change->get_state(), 0, 1);
+                agent_change->change_state(agent_change->get_state(), 0, order_qty);
             }
         }
         timeout_queue.pop();

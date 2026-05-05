@@ -9,7 +9,7 @@ bool buy_trade(Order &order, Orderbook &buy, Orderbook &sell, TradeObserver& obs
 bool sell_trade(Order &order, Orderbook &buy, Orderbook &sell, TradeObserver& observer);
 void sweep_book(Orderbook& buy, Orderbook& sell, TradeObserver& observer);
 bool match_orders(Order &order, Orderbook &buy, Orderbook &sell);
-void log_trade(Order &buyer, Order &seller, float price, float spread);
+void log_trade(Order &buyer, Order &seller, float price, float spread, int qty);
 void prepare_file(void);
 
 #endif // TRADES_H

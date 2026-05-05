@@ -31,7 +31,7 @@ class Simulator : public TradeObserver {
        // void on_trade_executed(const Order& buy_order, const Order& sell_order, float price, float spread) override;
        // void track_resting_order_for_timeout(std::shared_ptr<Order> order_ptr) override;
         // Compatibility wrappers for existing names.
-        void on_trade_agent_state(const Order& buy_order, const Order& sell_order, float price, float spread) override;
+        void on_trade_agent_state(const Order& buy_order, const Order& sell_order, float price, float spread, int qty) override;
         void update_time_order_index(std::shared_ptr<Order> order_ptr) override;
         void create_vector_agent_ids(); 
         std::vector<int> shuffle_agent_ids();

@@ -10,9 +10,10 @@ private:
     OrderType trade_type; 
     int time_placed;
     OrderStatus state; 
+    int qty;
 
 public:
-    Order(int price, int id, OrderType trade_type, int time_placed, OrderStatus state);
+    Order(int price, int id, OrderType trade_type, int time_placed, OrderStatus state, int qty);
     Order() = default;
 
     int getPrice() const;
@@ -20,6 +21,8 @@ public:
     OrderType getTradeType() const;
     int getTimePlaced() const;
     OrderStatus getStatus() const;
+    int getQty() const;
+    void changeQty(int added_qty);
 
     void fill_order();
     void timeout_order();
