@@ -123,7 +123,7 @@ void Simulator::on_trade_agent_state(const Order& buy_order, const Order& sell_o
     Agent* seller = get_agent(sell_id);
 
     if (buyer) {
-        buyer->change_state(AgentState::Holding, spread, qty); // Buyer receives qty shares + changed state to holding
+        buyer->change_state(AgentState::Holding, spread*qty, qty); // Buyer receives qty shares + changed state to holding
     }
     if (seller) {
         seller->change_state(AgentState::Liquid, price*qty, 0); // Seller receives cash + changed state to perfectly liquid

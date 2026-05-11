@@ -9,7 +9,7 @@ Agent::Agent(Simulator &sim, const IAgentDecisionEngine &decision_engine, int id
       shares(shares), state(state) {}
 Agent::~Agent() {}
 
-void Agent::place_order(Order &order) {
+void Agent::place_order(Order &order) { //TODO need to sort out multi-share orders
   if (order.getTradeType() == OrderType::Buy) {
     simulator.simulator_buy_trade(order);
     cash -=

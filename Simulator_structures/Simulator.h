@@ -39,7 +39,7 @@ class Simulator : public TradeObserver {
         std::map<int, int> get_volume_time_log();
         const std::map<int, int>& get_volume_time_log_ref() const;
         int get_current_time() const;
-        void expire_timed_out_orders(int timeout_duration = 5);
+        //void expire_timed_out_orders(int timeout_duration = 5);
         void find_order_timeouts(int timeout_duration = 5);
         void initialize_agents(int no_agents = 10);
         void simulator_start(int no_agents = 10); // compatibility wrapper
