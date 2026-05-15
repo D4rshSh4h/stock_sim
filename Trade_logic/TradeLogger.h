@@ -31,7 +31,7 @@ public:
     void init(const std::string& filepath);
 
     // Record one trade.
-    void log(int buyer_id, int seller_id, float price, float spread);
+    void log(int buyer_id, int seller_id, float price, float spread, int qty);
 
     // Force-flush any remaining buffered rows to disk.
     // Should be called when the simulation ends.
@@ -51,6 +51,7 @@ private:
         int   seller_id;
         float price;
         float spread;
+        int qty;
     };
 
     std::vector<TradeRecord> buffer_;   // in-memory accumulator

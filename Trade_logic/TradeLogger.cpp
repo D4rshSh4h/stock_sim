@@ -11,7 +11,7 @@ void TradeLogger::init(const std::string& filepath) {
     if (USE_BUFFERED_LOGGING) {
         file_.open(filepath_, std::ios::out | std::ios::trunc);
         if (file_.is_open()) {
-            file_ << "Buyer ID, Seller ID, Price, Spread" << std::endl;
+            file_ << "Buyer ID, Seller ID, Qty, Price, Spread" << std::endl;
         } else {
             std::cerr << "TradeLogger: Unable to open file " << filepath_ << std::endl;
         }
@@ -19,16 +19,16 @@ void TradeLogger::init(const std::string& filepath) {
         // Immediate mode simply prepares the file by writing the header
         std::ofstream header_file(filepath_, std::ios::out | std::ios::trunc);
         if (header_file.is_open()) {
-            header_file << "Buyer ID, Seller ID, Price, Spread" << std::endl;
+            header_file << "Buyer ID, Seller ID, Qty, Price, Spread" << std::endl;
         } else {
             std::cerr << "TradeLogger: Unable to open file " << filepath_ << std::endl;
         }
     }
 }
 
-void TradeLogger::log(int buyer_id, int seller_id, float price, float spread) {
+void TradeLogger::log(int buyer_id, int seller_id, float price, float spread, int qty) {
     if (USE_BUFFERED_LOGGING) {
-        buffer_.push_back({buyer_id, seller_id, price, spread});
+        buffer_.push_back({buyer_id, seller_id, price, spread, qty});
         if (buffer_.size() >= LOG_BUFFER_SIZE) {
             flush_buffer_to_file();
         }
@@ -36,7 +36,7 @@ void TradeLogger::log(int buyer_id, int seller_id, float price, float spread) {
         // Immediate mode (legacy/debug behavior)
         std::ofstream log_file(filepath_, std::ios::app);
         if (log_file.is_open()) {
-            log_file << buyer_id << ", " << seller_id << ", " << price << ", " << spread << std::endl;
+            log_file << buyer_id << ", " << seller_id << ", " << qty << ", " << price << ", " << spread << std::endl;
         }
     }
 }
@@ -57,6 +57,7 @@ void TradeLogger::flush_buffer_to_file() {
         for (const auto& record : buffer_) {
             file_ << record.buyer_id << ", " 
                   << record.seller_id << ", " 
+                  << record.qty << ", "
                   << record.price << ", " 
                   << record.spread << std::endl;
         }

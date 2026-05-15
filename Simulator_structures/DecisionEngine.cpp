@@ -1,6 +1,7 @@
 #include "DecisionEngine.h"
 #include "rng.h"
 #include <random>
+#include <cmath>
 
 bool RandomDecisionEngine::decide2() const {
   std::bernoulli_distribution dist(0.5);
@@ -26,9 +27,11 @@ std::optional<Order> RandomDecisionEngine::agent_buy(const AgentDecisionContext 
   if (ctx.cash < price) {
     return std::nullopt;
   }
+  int max_shares = std::floor(ctx.cash/price);
+  int shares_to_buy = std::uniform_int_distribution<>(1, max_shares)(get_rng());
   return std::make_optional(Order(float_to_int_price(price), ctx.agent_id,
                                   OrderType::Buy, ctx.current_time,
-                                  OrderStatus::Active, 1));
+                                  OrderStatus::Active, shares_to_buy));
 }
 
 std::optional<Order> RandomDecisionEngine::agent_sell(const AgentDecisionContext &ctx) const {
@@ -45,9 +48,10 @@ std::optional<Order> RandomDecisionEngine::agent_sell(const AgentDecisionContext
   if (ctx.shares < 1) {
     return std::nullopt;
   }
+  int shares_to_sell = std::uniform_int_distribution<>(1, ctx.shares)(get_rng());
   return std::make_optional(Order(float_to_int_price(price), ctx.agent_id,
                                   OrderType::Sell, ctx.current_time,
-                                  OrderStatus::Active,1));
+                                  OrderStatus::Active, shares_to_sell));
 }
 
 std::optional<Order> RandomDecisionEngine::decide_order(const AgentDecisionContext &ctx) const {

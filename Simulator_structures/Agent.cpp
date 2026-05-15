@@ -12,12 +12,10 @@ Agent::~Agent() {}
 void Agent::place_order(Order &order) { //TODO need to sort out multi-share orders
   if (order.getTradeType() == OrderType::Buy) {
     simulator.simulator_buy_trade(order);
-    cash -=
-        int_to_float_price(order.getPrice()); // Deduct cash immediately when placing a buy order
+    cash -= int_to_float_price(order.getPrice())*order.getQty(); // Deduct cash immediately when placing a buy order
   } else {
     simulator.simulator_sell_trade(order);
-    shares -= 1; // Deduct shares immediately when placing a sell order
-                 // (assuming 1 share per order)
+    shares -= order.getQty(); 
   }
 }
 

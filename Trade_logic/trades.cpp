@@ -137,7 +137,7 @@ void log_trade(Order& buyer, Order& seller, float price, float spread, int qty) 
         std::cout << "No trade observer set. Unable to update agent states." << std::endl;
     }
 
-    TradeLogger::instance().log(buyer.getId(), seller.getId(), price, spread);
+    TradeLogger::instance().log(buyer.getId(), seller.getId(), price, spread, qty);
 }
 
 
