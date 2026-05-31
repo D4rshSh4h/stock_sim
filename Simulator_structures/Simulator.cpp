@@ -173,6 +173,8 @@ void Simulator::find_order_timeouts(int timeout_duration) {
     }
 }
 
+//Agent initialization
+
 void Simulator::create_vector_agent_ids() {
     agent_ids.clear();
     for (const auto& pair : agents) {

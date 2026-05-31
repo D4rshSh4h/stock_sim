@@ -7,6 +7,14 @@
 #include <iostream>
 
 // TODO need to create a mechanism to add cash mid simulation
+//TODO cross asset simulations
+
+/*
+Tick Structure:
+5 ticks = 1 block
+Business cycle --> Growth and recession for 4 blocks, peaks and troughs for 2 blocks
+Company releases earning every 3 blocks
+*/
 
 int main() {
   // Setup

@@ -26,10 +26,19 @@ std::shared_ptr<Order> get_best_resting_order(Orderbook& book, int price, bool i
 
 // Handles spread calculation and logging — common to all three scenarios
 void process_trade(Order& incoming, std::shared_ptr<Order> resting, float exec_price, int traded_qty) {
-    float spread = (incoming.getTradeType() == OrderType::Buy)
-        ? calculate_spread(incoming, *resting)
-        : calculate_spread(*resting, incoming);
-    log_trade(incoming, *resting, exec_price, spread, traded_qty);
+    float spread;
+    if(incoming.getTradeType() == OrderType::Buy){
+        spread = calculate_spread(incoming, *resting);
+        log_trade(incoming, *resting, exec_price, spread, traded_qty);
+    }
+    else if(incoming.getTradeType() == OrderType::Sell){
+        spread = calculate_spread(*resting, incoming);
+        log_trade(*resting, incoming, exec_price, spread, traded_qty, OrderType::Sell);
+    }
+    else{
+        std::cout << "Error: Problem in process_trade and handling trade types" << std::endl;
+    }
+    
 }
 
 bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
@@ -129,7 +138,7 @@ void prepare_file(void) {
     }
 }
 
-void log_trade(Order& buyer, Order& seller, float price, float spread, int qty) {
+void log_trade(Order& buyer, Order& seller, float price, float spread, int qty, OrderType trade_type) { //Type is Buy by default
     if(observer_){
         observer_->on_trade_agent_state(buyer, seller, price, spread, qty);
     }
@@ -137,7 +146,7 @@ void log_trade(Order& buyer, Order& seller, float price, float spread, int qty) 
         std::cout << "No trade observer set. Unable to update agent states." << std::endl;
     }
 
-    TradeLogger::instance().log(buyer.getId(), seller.getId(), price, spread, qty);
+    TradeLogger::instance().log(buyer.getId(), seller.getId(), price, spread, qty, trade_type);
 }
 
 
@@ -204,6 +213,7 @@ void sweep_book(Orderbook& buy, Orderbook& sell, TradeObserver& observer) {
             float traded_price = int_to_float_price((highest_buy_price + lowest_sell_price) / 2);
             float spread = calculate_spread(*buy_order, *sell_order); 
 
+            //OrderType in sweep_book will remain as Buy for now
             if(buy_qty > sell_qty){
                 sell_order->fill_order();
                 sell.removeOrder(*sell_order);
