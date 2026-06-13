@@ -1,6 +1,7 @@
 # Stock Market Simulator
 
 This is a fun project i'm doing to also (hopefully) learn some c++ along the way.
+
 ---
 
 ## Overview
@@ -11,12 +12,14 @@ The simulator runs a tick-based loop. At each tick, every agent independently de
 Certain data is then logged to csv files and can then be processed using python scripts. Data logging is buffered or continous.
 
 Note that all simulation parameters are in config.h
+
 ---
 
 ## Future tasks
 Currently working on a more accurate simulator. This will include agents with different 'personalities' to simulate varied behaviour like in real markets. Furthermore, the simulator will be encapsulated in a 'financial world', which will influence interest rates and money supply for some macro factors. 
 
 Updates for data processing, logging and presentation will be continous
+
 ---
 
 ### Disclaimer
