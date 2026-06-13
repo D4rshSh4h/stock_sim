@@ -8,6 +8,7 @@
 
 // TODO need to create a mechanism to add cash mid simulation
 //TODO cross asset simulations
+//TODO need to create an interface (e.g. app) where my project can be tried out
 
 /*
 Tick Structure:
