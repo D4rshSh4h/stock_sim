@@ -28,7 +28,7 @@ int main() {
   Orderbook &sell_book_ref = simulator.get_sell_book();
 
   // Simulation
-  // TODO track bid-ask prices
+  // TODO track bid-ask prices - use trade_type and spread in csv
   for (int i = 0; i < TICKS; i++) {
     simulator.update_time();
     std::vector<int> shuffled_ids = simulator.shuffle_agent_ids();
