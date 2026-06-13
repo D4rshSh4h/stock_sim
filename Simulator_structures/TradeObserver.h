@@ -13,4 +13,4 @@ class TradeObserver{
         virtual ~TradeObserver() = default;
 };
 
-#endif // TRADEOBSERVER_H
+#endif // TRADEOBSERVER_H  
