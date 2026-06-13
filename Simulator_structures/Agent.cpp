@@ -9,6 +9,7 @@ Agent::Agent(Simulator &sim, const IAgentDecisionEngine &decision_engine, int id
       shares(shares), state(state) {}
 Agent::~Agent() {}
 
+//Calls functions to place an order via simulator
 void Agent::place_order(Order &order) { 
   if (order.getTradeType() == OrderType::Buy) {
     simulator.simulator_buy_trade(order);
@@ -19,7 +20,7 @@ void Agent::place_order(Order &order) {
   }
 }
 
-
+//Main function for the agent --> passes context through decision engine and handles its output
 void Agent::run() {
   if (cash == 0 && shares == 0) {
     state = AgentState::Liquid;

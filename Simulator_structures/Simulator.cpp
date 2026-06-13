@@ -21,7 +21,7 @@ int Simulator::get_volume(int time) const {
     if (it != volume_time_log.end()) {
         return it->second;
     }
-    return 0; // Return 0 if no volume data is found for the given time
+    return 0; 
 }
 float Simulator::get_price(int time) const {
     auto it = price_time_log.find(time);
@@ -65,6 +65,7 @@ void Simulator::log_volume() {
     volume_time_log[time] = volume;
 }
 
+//Alt method to update price using midpoint of spread - NOT USED CURRENTLY
 void Simulator::update_price(float lowest_ask, float highest_bid) {
     if (lowest_ask != NO_BOOK_PRICE_FLOAT && highest_bid != NO_BOOK_PRICE_FLOAT) {
         current_price = (lowest_ask + highest_bid) / 2.0; // Midpoint price
@@ -80,9 +81,10 @@ Agent* Simulator::get_agent(int id) {
     if (it != agents.end()) {
         return it->second.get();
     }  
-    return nullptr; // Return nullptr if no agent is found with the given id
+    return nullptr; 
 }
 
+//Wrapper for buy trade in order to access function through simulator
 void Simulator::simulator_buy_trade(Order& order) { 
     buy_trade(order, buy_book, sell_book, *this);
     /*
@@ -94,6 +96,7 @@ void Simulator::simulator_buy_trade(Order& order) {
     
 }
 
+//Wrapper for sell trade in order to access function through simulator
 void Simulator::simulator_sell_trade(Order& order) {
     sell_trade(order, buy_book, sell_book, *this);
     /*
@@ -106,7 +109,8 @@ void Simulator::simulator_sell_trade(Order& order) {
 } 
 
 
-
+//Function which allocates resources to agents after a trade - called from trades.cpp
+//Also updates mkt price as the price of the trade (latest trade made)
 void Simulator::on_trade_agent_state(const Order& buy_order, const Order& sell_order, float price, float spread, int qty) {
     //qty refers to the number of shares traded in this particular trade
     int buy_id = buy_order.getId();
@@ -134,16 +138,15 @@ void Simulator::on_trade_agent_state(const Order& buy_order, const Order& sell_o
 
 
 void Simulator::update_time_order_index(std::shared_ptr<Order> order_ptr) {
-    //track_resting_order_for_timeout(order_ptr);
     if (order_ptr) {
         timeout_queue.push(order_ptr);
     }
 }
  
 
-
+//Uses the timeout queue to find expired orders and return resources back to the agents
 void Simulator::find_order_timeouts(int timeout_duration) {
-    //expire_timed_out_orders(timeout_duration);
+    
     while (!timeout_queue.empty()) {
         std::shared_ptr<Order> order = timeout_queue.front().lock();
         if (!order) {
@@ -162,7 +165,7 @@ void Simulator::find_order_timeouts(int timeout_duration) {
         order->cancel_order();
         Agent* agent_change = get_agent(order->getId());
         if (agent_change) {
-            int order_qty = order->getQty(); //Qty of shares of order in orderbook remaining
+            int order_qty = order->getQty(); 
             if(order->getTradeType() == OrderType::Buy){
                 agent_change->change_state(agent_change->get_state(), int_to_float_price(order->getPrice())*order_qty, 0);
             } else {
@@ -174,6 +177,11 @@ void Simulator::find_order_timeouts(int timeout_duration) {
 }
 
 //Agent initialization
+/*
+Using the stars and bars method to give initial allocation of resources to agents. Tried to make it as unbiased as possible
+You can then init the decision engine for the agent (to be implemented)
+
+*/
 
 void Simulator::create_vector_agent_ids() {
     agent_ids.clear();
@@ -184,7 +192,7 @@ void Simulator::create_vector_agent_ids() {
 
 std::vector<int> Simulator::shuffle_agent_ids() {
     std::vector<int> shuffled_ids = agent_ids;
-    //static std::mt19937 gen(std::random_device{}());
+    
     std::shuffle(shuffled_ids.begin(), shuffled_ids.end(), gen);
     return shuffled_ids;
 }

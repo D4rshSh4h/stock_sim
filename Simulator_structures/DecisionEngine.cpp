@@ -13,6 +13,7 @@ int RandomDecisionEngine::decide3() const {
   return dist(get_rng());
 }
 
+//Creates a buy order from a distribution of mkt price +- delta
 std::optional<Order> RandomDecisionEngine::agent_buy(const AgentDecisionContext &ctx) const {
   std::uniform_real_distribution<float> price_dist;
   float delta = RANGE * ctx.current_price;
@@ -34,6 +35,7 @@ std::optional<Order> RandomDecisionEngine::agent_buy(const AgentDecisionContext 
                                   OrderStatus::Active, shares_to_buy));
 }
 
+//Creates a sell order from a distribution of mkt price +- delta
 std::optional<Order> RandomDecisionEngine::agent_sell(const AgentDecisionContext &ctx) const {
   std::uniform_real_distribution<float> price_dist;
   float delta = RANGE * ctx.current_price;
@@ -54,6 +56,7 @@ std::optional<Order> RandomDecisionEngine::agent_sell(const AgentDecisionContext
                                   OrderStatus::Active, shares_to_sell));
 }
 
+//Decides whether the agent buys, sells or holds. Takes agents resources into account
 std::optional<Order> RandomDecisionEngine::decide_order(const AgentDecisionContext &ctx) const {
   if (ctx.shares == 0) {
     bool decision = decide2();

@@ -30,11 +30,11 @@ enum class OrderStatus : uint8_t {
 // Simulator specific constants
 constexpr float RANGE = 0.05f; 
 constexpr float BUFFER = 10.0f; // Buffer for price generation
-constexpr int NO_AGENTS = 10;
-constexpr int TICKS = 100;
+constexpr int NO_AGENTS = 1000;
+constexpr int TICKS = 1000;
 constexpr float INITIAL_PRICE = 100.0f;
-constexpr float TOTAL_CASH = 200000.0f;
-constexpr int TOTAL_SHARES = 1000;
+constexpr float TOTAL_CASH = 20000000.0f;
+constexpr int TOTAL_SHARES = 10000;
 constexpr int TIMEOUT_DURATION = 10;
 constexpr int NO_BOOK_PRICE_INT = -1;
 constexpr float NO_BOOK_PRICE_FLOAT = -1.0f;

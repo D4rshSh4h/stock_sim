@@ -5,7 +5,7 @@
 #include <fstream>
 
 
-
+//TradeObserver setup to access some methods from simulator
 TradeObserver* observer_ = nullptr;
 void set_trade_observer(TradeObserver* observer) {
     observer_ = observer;
@@ -41,6 +41,7 @@ void process_trade(Order& incoming, std::shared_ptr<Order> resting, float exec_p
     
 }
 
+//Tries to match an order, if not, rests order (or remaining qty) in orderbook
 bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
     OrderType trade_type = order.getTradeType();
     int order_price = order.getPrice();
@@ -125,7 +126,7 @@ bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
     return matched;
 }
 
-
+//Sets up the volume and trade logs
 void prepare_file(void) { 
     TradeLogger::instance().init("trade_log.csv");
 
@@ -138,7 +139,9 @@ void prepare_file(void) {
     }
 }
 
-void log_trade(Order& buyer, Order& seller, float price, float spread, int qty, OrderType trade_type) { //Type is Buy by default
+//Is called after any two trades match. Calls method in simulator to handle resource allocation, and then trade logger to log the trade
+//trade_type param is Buy by default
+void log_trade(Order& buyer, Order& seller, float price, float spread, int qty, OrderType trade_type) { 
     if(observer_){
         observer_->on_trade_agent_state(buyer, seller, price, spread, qty);
     }
@@ -150,7 +153,7 @@ void log_trade(Order& buyer, Order& seller, float price, float spread, int qty, 
 }
 
 
-
+//Called through simulator and handles buy orders
 bool buy_trade(Order &order, Orderbook &buy, Orderbook &sell, TradeObserver& observer) {
     //If trade not matched add to orderbook
     if (!match_orders(order, buy, sell)) {
@@ -166,6 +169,7 @@ bool buy_trade(Order &order, Orderbook &buy, Orderbook &sell, TradeObserver& obs
     return true;
 }
 
+//Called through simulator and handles sell orders
 bool sell_trade(Order &order, Orderbook &buy, Orderbook &sell, TradeObserver& observer) {
     //If trade not matched add to orderbook
     if (!match_orders(order, buy, sell)) {
@@ -181,6 +185,7 @@ bool sell_trade(Order &order, Orderbook &buy, Orderbook &sell, TradeObserver& ob
     return true;
 }
 
+//Scans orderbook in each tick to match resting orders after all orders of the tick have come in 
 void sweep_book(Orderbook& buy, Orderbook& sell, TradeObserver& observer) {
     while (!buy.is_empty() && !sell.is_empty()) {
         auto highest_buy_opt = buy.best_bid_price();
