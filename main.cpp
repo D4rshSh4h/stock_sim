@@ -1,14 +1,16 @@
 #include "Simulator_structures/Agent.h"
 #include "Simulator_structures/Simulator.h"
+#include "Simulator_structures/World.h"
 #include "Trade_logic/trades.h"
 #include "Trade_logic/TradeLogger.h"
 #include "config.h"
 #include "file_handler.h"
 #include <iostream>
 
-// TODO need to create a mechanism to add cash mid simulation
+//TODO need to create a mechanism to add cash mid simulation
 //TODO cross asset simulations
 //TODO need to create an interface (e.g. app) where my project can be tried out
+//TODO let agents set thier own timeout durations
 
 /*
 Tick Structure:
@@ -21,6 +23,7 @@ Company releases earning every 3 blocks
 int main() {
   // Setup
   Simulator simulator(INITIAL_PRICE, TOTAL_CASH, TOTAL_SHARES);
+  World world;
   prepare_file();
   set_trade_observer(&simulator);
   simulator.initialize_agents(NO_AGENTS);
@@ -29,23 +32,26 @@ int main() {
   Orderbook &buy_book_ref = simulator.get_buy_book();
   Orderbook &sell_book_ref = simulator.get_sell_book();
 
+  int current_time;
   // Simulation
   // TODO track bid-ask prices - use trade_type and spread in csv
   for (int i = 0; i < TICKS; i++) {
-    simulator.update_time();
+    //simulator.update_time();
+    world.update_time();
+    current_time = world.get_time();
     std::vector<int> shuffled_ids = simulator.shuffle_agent_ids();
     for (int id : shuffled_ids) {
       Agent *agent = simulator.get_agent(id);
       if (agent) {
-        agent->run();
+        agent->run(current_time);
       }
     }
 
     sweep_book(buy_book_ref, sell_book_ref, simulator);
-    simulator.find_order_timeouts(TIMEOUT_DURATION);
+    simulator.find_order_timeouts(current_time, TIMEOUT_DURATION);
 
     // simulator.log_price();
-    simulator.log_volume();
+    simulator.log_volume(current_time);
     simulator.reset_volume();
   }
   TradeLogger::instance().flush();

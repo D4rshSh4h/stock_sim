@@ -21,7 +21,7 @@ class Simulator : public TradeObserver {
         float get_price(int time) const; //Gets a single price
         void update_time(); 
         void log_price(); //Adds current price to price_time_log with current time as key
-        void log_volume(); //Adds current volume to volume_time_log with current time as key
+        void log_volume(int time); //Adds current volume to volume_time_log with current time as key
         void update_price(float lowest_ask, float highest_bid);
         Orderbook& get_buy_book();
         Orderbook& get_sell_book(); 
@@ -40,14 +40,14 @@ class Simulator : public TradeObserver {
         const std::map<int, int>& get_volume_time_log_ref() const;
         int get_current_time() const;
         //void expire_timed_out_orders(int timeout_duration = 5);
-        void find_order_timeouts(int timeout_duration = 5);
+        void find_order_timeouts(int time, int timeout_duration = 5);
         void initialize_agents(int no_agents = 10);
         void simulator_start(int no_agents = 10); // compatibility wrapper
         
     private:
         float current_price;
         int volume;
-        int time;
+        //int time;
         float total_cash; //Total cash circulating in system
         int total_shares; //Total shares circulating in system
         Orderbook buy_book;
@@ -68,4 +68,4 @@ class Simulator : public TradeObserver {
 
 };    
 
-#endif // SIMULATOR_H
+#endif // SIMULATOR_H 

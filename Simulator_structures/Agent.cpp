@@ -3,6 +3,9 @@
 #include "Simulator.h"
 #include <optional>
 
+//Agent types:
+
+
 Agent::Agent(Simulator &sim, const IAgentDecisionEngine &decision_engine, int id,
              float cash, int shares, AgentState state)
     : simulator(sim), decision_engine(decision_engine), id(id), cash(cash),
@@ -21,7 +24,7 @@ void Agent::place_order(Order &order) {
 }
 
 //Main function for the agent --> passes context through decision engine and handles its output
-void Agent::run() {
+void Agent::run(int time) {
   if (cash == 0 && shares == 0) {
     state = AgentState::Liquid;
     return;
@@ -32,7 +35,7 @@ void Agent::run() {
       cash,
       shares,
       simulator.get_current_price(),
-      simulator.get_current_time(),
+      time,
   };
   std::optional<Order> order_opt = decision_engine.decide_order(ctx);
   if (order_opt.has_value()) {
@@ -53,9 +56,12 @@ AgentState Agent::get_state() const { return state; }
 float Agent::get_cash() const { return cash; }
 int Agent::get_shares() const { return shares; }
 
+/*
 void Agent::run_agent() {
   run();
 }
+*/
+
 
 void Agent::change_state(AgentState new_state, float added_cash, int added_shares) {
   //apply_state_change(new_state, added_cash, added_shares);

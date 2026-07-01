@@ -9,7 +9,7 @@
 #include <numeric>
 #include <iostream>
 
-Simulator::Simulator(float initial_price, float total_cash, int total_shares) : current_price(initial_price), volume(0), time(0), total_cash(total_cash), total_shares(total_shares) {}
+Simulator::Simulator(float initial_price, float total_cash, int total_shares) : current_price(initial_price), volume(0), total_cash(total_cash), total_shares(total_shares) {}
 Simulator::~Simulator() {}  
 auto& gen = get_rng(); // Random number generator for the simulator
 
@@ -39,12 +39,14 @@ const std::map<int, int>& Simulator::get_volume_time_log_ref() const {
     return volume_time_log;
 }
 
+/*
 int Simulator::get_current_time() const {
     return time;
 }
-
+*/
+/*
 void Simulator::update_time() {time++;}
-
+*/
 Orderbook& Simulator::get_buy_book() {
     return buy_book;
 }   
@@ -57,14 +59,17 @@ void Simulator::reset_volume() {
     volume = 0;
 }
 
+/*
 void Simulator::log_price() { 
     price_time_log[time] = current_price;
 }   
+*/
 
-void Simulator::log_volume() {
+
+void Simulator::log_volume(int time) {
     volume_time_log[time] = volume;
 }
-
+ 
 //Alt method to update price using midpoint of spread - NOT USED CURRENTLY
 void Simulator::update_price(float lowest_ask, float highest_bid) {
     if (lowest_ask != NO_BOOK_PRICE_FLOAT && highest_bid != NO_BOOK_PRICE_FLOAT) {
@@ -145,7 +150,7 @@ void Simulator::update_time_order_index(std::shared_ptr<Order> order_ptr) {
  
 
 //Uses the timeout queue to find expired orders and return resources back to the agents
-void Simulator::find_order_timeouts(int timeout_duration) {
+void Simulator::find_order_timeouts(int time, int timeout_duration) {
     
     while (!timeout_queue.empty()) {
         std::shared_ptr<Order> order = timeout_queue.front().lock();
