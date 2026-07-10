@@ -16,8 +16,8 @@
 Tick Structure:
 STATIC TICK STRUCTURE FOR NOW
 5 ticks = 1 block
-Business cycle --> Growth and recession for 4 blocks, peaks and troughs for 2 blocks
-Company releases earning every 3 blocks
+Company releases earning every 5 blocks
+Interest rates change every 3 blocks
 */
 
 int main() {

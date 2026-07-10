@@ -4,6 +4,16 @@
 #include <cstdint>
 #include <cmath>
 
+const double pi = std::acos(-1);
+
+//World
+constexpr int TICKS_TO_BLOCK = 5;
+constexpr int FREQ = 10;
+constexpr int AMPLITUDE = 1;
+constexpr float RATE_MIN = 0.03;
+constexpr float RATE_MAX = 0.09;
+
+
 // Agent States
 enum class AgentState : char {
     Buying = 'b',
