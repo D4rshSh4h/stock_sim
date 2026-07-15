@@ -18,6 +18,7 @@ STATIC TICK STRUCTURE FOR NOW
 5 ticks = 1 block
 Company releases earning every 5 blocks
 Interest rates change every 3 blocks
+A full business cycle every 4 blocks
 */
 
 int main() {
@@ -36,9 +37,9 @@ int main() {
   // Simulation
   // TODO track bid-ask prices - use trade_type and spread in csv
   for (int i = 0; i < TICKS; i++) {
-    //simulator.update_time();
     world.update_time();
     current_time = world.get_time();
+    //Get interest rates etc. 
     std::vector<int> shuffled_ids = simulator.shuffle_agent_ids();
     for (int id : shuffled_ids) {
       Agent *agent = simulator.get_agent(id);

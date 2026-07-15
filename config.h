@@ -8,11 +8,11 @@ const double pi = std::acos(-1);
 
 //World
 constexpr int TICKS_TO_BLOCK = 5;
-constexpr int FREQ = 10;
-constexpr int AMPLITUDE = 1;
+constexpr int TICKS_PER_CYCLE = 20;
 constexpr float RATE_MIN = 0.03;
 constexpr float RATE_MAX = 0.09;
-
+constexpr float AMPLITUDE = (RATE_MAX-RATE_MIN)/2.0;
+constexpr float MIDPOINT = (RATE_MAX+RATE_MIN)/2.0;
 
 // Agent States
 enum class AgentState : char {
