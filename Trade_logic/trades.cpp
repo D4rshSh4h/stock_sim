@@ -39,7 +39,7 @@ void process_trade(Order& incoming, std::shared_ptr<Order> resting, float exec_p
         std::cout << "Error: Problem in process_trade and handling trade types" << std::endl;
     }
     
-}
+} 
 
 //Tries to match an order, if not, rests order (or remaining qty) in orderbook
 bool match_orders(Order& order, Orderbook& buy, Orderbook& sell) {
@@ -137,6 +137,7 @@ void prepare_file(void) {
     } else {
         std::cout << "Unable to initialize volume log file." << std::endl;
     }
+
 }
 
 //Is called after any two trades match. Calls method in simulator to handle resource allocation, and then trade logger to log the trade

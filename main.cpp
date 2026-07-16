@@ -57,4 +57,5 @@ int main() {
   }
   TradeLogger::instance().flush();
   print_volume(simulator.get_volume_time_log());
+  print_cycle(world.get_business_cycle_map(), world.get_interest_rate_map());
 }
