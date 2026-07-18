@@ -14,6 +14,9 @@ constexpr float RATE_MAX = 10;
 constexpr float AMPLITUDE = (RATE_MAX-RATE_MIN)/2.0;
 constexpr float MIDPOINT = (RATE_MAX+RATE_MIN)/2.0;
 
+//Company
+constexpr int BASE_FCF_VALUE = 1000;
+
 // Agent States
 enum class AgentState : char {
     Buying = 'b',

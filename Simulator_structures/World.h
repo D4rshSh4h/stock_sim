@@ -16,7 +16,7 @@ class World{
     
     private:
         void change_interest_rate();
-        int time = 0;
+        int time = 0; 
         float interest_rate;
         float freq_multiplier;
         std::vector<float> business_cycle_map;

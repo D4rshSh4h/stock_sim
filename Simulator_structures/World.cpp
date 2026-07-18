@@ -23,19 +23,20 @@ void World::update_time(){
         //std::cout << "change rate called at time: " << time << std::endl;
         change_interest_rate();
     }
-    business_cycle_map.push_back(get_business_cycle());
+    business_cycle_map.push_back(std::sin(get_business_cycle()));
     interest_rate_map.push_back(interest_rate);
 }
-     
+
+//Returns ANGLE not the sin(value)
 float World::get_business_cycle(){
     //TODO define what each value means at the company level
-    return std::sin(time*freq_multiplier);
+    return time*freq_multiplier;
 }
 
 float World::get_interest_rate(){
-    return interest_rate;
-}
-
+    return interest_rate;             
+}  
+ 
 std::vector<float> World::get_business_cycle_map(){
     return business_cycle_map;
 }

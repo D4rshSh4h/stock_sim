@@ -68,4 +68,4 @@ void Agent::change_state(AgentState new_state, float added_cash, int added_share
   state = new_state;
   cash += added_cash;
   shares += added_shares;
-}
+}       
