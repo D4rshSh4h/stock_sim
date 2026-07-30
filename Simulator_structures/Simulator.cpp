@@ -8,6 +8,7 @@
 #include <iterator>
 #include <numeric>
 #include <iostream>
+#include <cmath>
 
 Simulator::Simulator(float initial_price, float total_cash, int total_shares) : current_price(initial_price), volume(0), total_cash(total_cash), total_shares(total_shares) {}
 Simulator::~Simulator() {}  
@@ -275,9 +276,14 @@ void Simulator::initialize_agents(int no_agents) {
     std::vector<std::unique_ptr<Agent>> temp_agent_vector;
     for(int i = 0; i< no_agents; i++){
         const IAgentDecisionEngine& engine = select_engine_for_agent(i);
-        temp_agent_vector.emplace_back(std::make_unique<Agent>(*this, engine, i, 0.00, 0, AgentState::Uninitialized));
+        int horizon = std::uniform_int_distribution<int>(MIN_TIME_HORIZON, MAX_TIME_HORIZON)(gen);
+        if(i < (i/2)){
+                temp_agent_vector.emplace_back(std::make_unique<Agent>(*this, engine, i, 0.00, 0, AgentState::Uninitialized, AgentBehaviour::Conservative, horizon));
+        }
+        else{
+                temp_agent_vector.emplace_back(std::make_unique<Agent>(*this, engine, i, 0.00, 0, AgentState::Uninitialized, AgentBehaviour::Agressive, horizon));
+        }
     }
-   
     std::shuffle(temp_agent_vector.begin(), temp_agent_vector.end(), gen);
     size_t split_index = choose_split_index(no_agents);
     int no_cash_agents = static_cast<int>(split_index);
@@ -285,7 +291,28 @@ void Simulator::initialize_agents(int no_agents) {
         return;
     }
     allocate_share_agents(temp_agent_vector, no_agents, split_index);
+    assign_growth_rate(temp_agent_vector);
     register_agents(temp_agent_vector);
+}
+
+void Simulator::assign_growth_rate(std::vector<std::unique_ptr<Agent>>& temp_agent_vector) {
+    for(auto& agent_ptr : temp_agent_vector){
+        AgentBehaviour behaviour = agent_ptr->get_behaviour();
+        if(behaviour == AgentBehaviour::Conservative){
+            //Normal dist with range +- benchmark and mean at benchmark
+            int growth_rate = -GROWTH_RATE_BENCHMARK + std::binomial_distribution<int>(GROWTH_RATE_BENCHMARK*2, 0.5)(gen);
+            agent_ptr->set_growth_rate(growth_rate);
+        }
+        else{
+            //Skewed dist with skew towards + or - benchmark using power distribution
+            int growth_rate = std::uniform_int_distribution<int>(GROWTH_RATE_BENCHMARK/2, GROWTH_RATE_BENCHMARK)(gen);
+            std::bernoulli_distribution d(0.5);
+            if(d(gen)){
+                growth_rate = -growth_rate;
+            }
+            agent_ptr->set_growth_rate(growth_rate);
+        }
+    }
 }
 
 void Simulator::simulator_start(int no_agents) {

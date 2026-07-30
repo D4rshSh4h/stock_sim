@@ -7,9 +7,9 @@
 
 
 Agent::Agent(Simulator &sim, const IAgentDecisionEngine &decision_engine, int id,
-             float cash, int shares, AgentState state)
+             float cash, int shares, AgentState state, AgentBehaviour behaviour, int time_horizon)
     : simulator(sim), decision_engine(decision_engine), id(id), cash(cash),
-      shares(shares), state(state) {}
+      shares(shares), state(state), behaviour(behaviour), time_horizon(time_horizon) {}
 Agent::~Agent() {}
 
 //Calls functions to place an order via simulator
@@ -24,7 +24,7 @@ void Agent::place_order(Order &order) {
 }
 
 //Main function for the agent --> passes context through decision engine and handles its output
-void Agent::run(int time) {
+void Agent::run(int time, std::pair<int, float>& world_data) {
   if (cash == 0 && shares == 0) {
     state = AgentState::Liquid;
     return;
@@ -36,6 +36,8 @@ void Agent::run(int time) {
       shares,
       simulator.get_current_price(),
       time,
+    world_data.first, //fcf
+    world_data.second //interest_rate
   };
   std::optional<Order> order_opt = decision_engine.decide_order(ctx);
   if (order_opt.has_value()) {
@@ -68,4 +70,24 @@ void Agent::change_state(AgentState new_state, float added_cash, int added_share
   state = new_state;
   cash += added_cash;
   shares += added_shares;
-}       
+}   
+
+void Agent::set_growth_rate(int rate) {
+    growth_rate = rate;
+}
+
+void Agent::set_time_horizon(int horizon) {
+    time_horizon = horizon;
+}
+
+int Agent::get_growth_rate() const {
+    return growth_rate;
+}
+
+int Agent::get_time_horizon() const {
+    return time_horizon;
+}
+
+AgentBehaviour Agent::get_behaviour() const {
+    return behaviour;
+}

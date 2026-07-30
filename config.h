@@ -14,8 +14,16 @@ constexpr float RATE_MAX = 10;
 constexpr float AMPLITUDE = (RATE_MAX-RATE_MIN)/2.0;
 constexpr float MIDPOINT = (RATE_MAX+RATE_MIN)/2.0;
 
+//Agent
+constexpr int MAX_TIME_HORIZON = 10;
+constexpr int MIN_TIME_HORIZON = 2;
+constexpr int GROWTH_RATE_BENCHMARK = 200;
+
 //Company
 constexpr int BASE_FCF_VALUE = 1000;
+
+//Decision Engine
+constexpr float GDP_GROWTH_RATE = 0.03;
 
 // Agent States
 enum class AgentState : char {
@@ -38,6 +46,11 @@ enum class OrderStatus : uint8_t {
     Filled = 1,
     Timeouted = 2,
     Cancelled = 3
+};
+
+enum class AgentBehaviour{
+    Conservative = 0,
+    Agressive = 1
 };
 
 // Simulator specific constants

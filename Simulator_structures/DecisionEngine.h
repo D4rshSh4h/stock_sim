@@ -11,6 +11,8 @@ struct AgentDecisionContext {
   int shares;
   float current_price;
   int current_time;
+  int company_fcf;
+  float interest_rate;
 };
 
 class IAgentDecisionEngine {
@@ -28,6 +30,12 @@ private:
   int decide3() const;
   std::optional<Order> agent_buy(const AgentDecisionContext &ctx) const;
   std::optional<Order> agent_sell(const AgentDecisionContext &ctx) const;
+};
+
+class IVDecisionEngine final : public IAgentDecisionEngine {
+  public:
+    std::optional<Order> decide_order(const AgentDecisionContext &ctx) const override;
+
 };
 
 #endif // DECISION_ENGINE_H

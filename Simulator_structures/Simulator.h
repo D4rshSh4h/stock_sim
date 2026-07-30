@@ -65,6 +65,7 @@ class Simulator : public TradeObserver {
         bool allocate_cash_agents(std::vector<std::unique_ptr<Agent>>& temp_agent_vector, int no_cash_agents);
         void allocate_share_agents(std::vector<std::unique_ptr<Agent>>& temp_agent_vector, int no_agents, size_t split_index);
         void register_agents(std::vector<std::unique_ptr<Agent>>& temp_agent_vector);
+        void assign_growth_rate(std::vector<std::unique_ptr<Agent>>& temp_agent_vector);
 
 };    
 

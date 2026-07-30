@@ -1,6 +1,7 @@
 #include "Simulator_structures/Agent.h"
 #include "Simulator_structures/Simulator.h"
 #include "Simulator_structures/World.h"
+#include "Simulator_structures/Company.h"
 #include "Trade_logic/trades.h"
 #include "Trade_logic/TradeLogger.h"
 #include "config.h"
@@ -25,6 +26,8 @@ int main() {
   // Setup
   Simulator simulator(INITIAL_PRICE, TOTAL_CASH, TOTAL_SHARES);
   World world;
+  Company company(world);
+
   prepare_file();
   set_trade_observer(&simulator);
   simulator.initialize_agents(NO_AGENTS);
@@ -39,12 +42,12 @@ int main() {
   for (int i = 0; i < TICKS; i++) {
     world.update_time();
     current_time = world.get_time();
-    //Get interest rates etc. 
+    auto p = company.send_data(); 
     std::vector<int> shuffled_ids = simulator.shuffle_agent_ids();
     for (int id : shuffled_ids) {
       Agent *agent = simulator.get_agent(id);
       if (agent) {
-        agent->run(current_time);
+        agent->run(current_time, p);
       }
     }
 

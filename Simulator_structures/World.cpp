@@ -34,7 +34,7 @@ float World::get_business_cycle(){
 }
 
 float World::get_interest_rate(){
-    return interest_rate;             
+    return std::round(interest_rate*100)/100;             
 }  
  
 std::vector<float> World::get_business_cycle_map(){

@@ -83,3 +83,11 @@ std::optional<Order> RandomDecisionEngine::decide_order(const AgentDecisionConte
   }
   return std::nullopt;
 }
+
+//Need to check order status - decide what to do if pending
+std::optional<Order> IVDecisionEngine::decide_order(const AgentDecisionContext &ctx) const {
+  // Implement your decision logic here based on the context
+  // For example, you can use the company_fcf and interest_rate to make decisions
+  // This is a placeholder implementation that always returns no order
+  return std::nullopt;
+}

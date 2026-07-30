@@ -51,3 +51,8 @@ int Company::generate_fcf(){
 std::vector<int> Company::get_all_earnings(){
     return earnings;
 }
+
+std::pair<int, float> Company::send_data(){
+    std::pair<int, float> p{generate_fcf(), world.get_interest_rate()};
+    return p;
+}
