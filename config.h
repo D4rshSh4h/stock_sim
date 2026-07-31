@@ -57,7 +57,7 @@ enum class AgentBehaviour{
 // Simulator specific constants
 constexpr float RANGE = 0.05f; 
 constexpr float BUFFER = 10.0f; // Buffer for price generation
-constexpr int NO_AGENTS = 100;
+constexpr int NO_AGENTS = 50;
 constexpr int TICKS = 100;
 constexpr float INITIAL_PRICE = 100.0f;
 constexpr float TOTAL_CASH = 200000.0f;

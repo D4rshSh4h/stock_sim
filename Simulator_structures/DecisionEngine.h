@@ -44,8 +44,8 @@ class IVDecisionEngine final : public IAgentDecisionEngine {
     float calculate_intrinsic_value(const AgentDecisionContext &ctx) const;
     float calculate_terminal_value(const AgentDecisionContext &ctx) const;
     double computeGap(double iv, float mkt_price) const;
-    std::pair<float, int> IVDecisionEngine::getPriceAndQty(double gap, float mkt_price, float threshold, double iv_per_share,
-             float cash, int shares_held, int max_qty, float delta, std::mt19937& rng, double skew_power = 2.0) const;
+    std::pair<float, int> getPriceAndQty(double gap, float mkt_price, float threshold, double iv_per_share,
+             float cash, int shares_held, int max_qty, float delta, double skew_power = 2.0) const;
 
 };
 

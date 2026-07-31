@@ -3,6 +3,7 @@
 #include <random>
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 
 bool RandomDecisionEngine::decide2() const {
   std::bernoulli_distribution dist(0.5);
@@ -118,7 +119,7 @@ double IVDecisionEngine::computeGap(double iv, float mkt_price) const {
 // Returns {price, qty}. qty: positive=buy, negative=sell, 0=hold (price=mkt_price on hold).
 // Threshold is the minimum gap to trigger a trade.
 std::pair<float, int> IVDecisionEngine::getPriceAndQty(double gap, float mkt_price, float threshold, double iv_per_share,
-             float cash, int shares_held, int max_qty, float delta, std::mt19937& rng, double skew_power = 2.0) const {
+             float cash, int shares_held, int max_qty, float delta, double skew_power) const {
     if (gap <= threshold && gap >= -threshold) return {mkt_price, 0};
 
     bool is_buy = gap > threshold;
@@ -127,7 +128,7 @@ std::pair<float, int> IVDecisionEngine::getPriceAndQty(double gap, float mkt_pri
     
 
     static thread_local std::uniform_real_distribution<double> unif(0.0, 1.0);
-    double u = unif(rng);
+    double u = unif(get_rng());
     double lower, upper, t;
     if (is_buy) {
         lower = mkt_price - delta;
@@ -141,7 +142,7 @@ std::pair<float, int> IVDecisionEngine::getPriceAndQty(double gap, float mkt_pri
     if (upper < lower) std::swap(lower, upper);
     float price = static_cast<float>(lower + (upper - lower) * t);
 
-    int max_qty = std::round(cash/price);
+    max_qty = std::round(cash/price);
     double raw_qty = normalised_gap * static_cast<double>(max_qty);
     double resource_cap = is_buy
         ? cash / std::max(iv_per_share, 1e-6)
@@ -156,12 +157,15 @@ std::pair<float, int> IVDecisionEngine::getPriceAndQty(double gap, float mkt_pri
 std::optional<Order> IVDecisionEngine::decide_order(const AgentDecisionContext &ctx) const {
   float IV = calculate_intrinsic_value(ctx);
   double gap = computeGap(IV, ctx.current_price);
-  auto pair = getPriceAndQty(gap, ctx.current_price, THRESHOLD, IV/TOTAL_SHARES, ctx.cash, ctx.shares, 0, RANGE, get_rng());
+  auto pair = getPriceAndQty(gap, ctx.current_price, THRESHOLD, IV/TOTAL_SHARES, ctx.cash, ctx.shares, 0, RANGE);
 
   if (pair.second != 0) {
-    return std::nullopt;
-  }
-  return std::make_optional(Order(float_to_int_price(pair.first), ctx.agent_id,
+    return std::make_optional(Order(float_to_int_price(pair.first), ctx.agent_id,
                                   pair.second > 0 ? OrderType::Buy : OrderType::Sell,
                                   ctx.current_time, OrderStatus::Active, std::abs(pair.second)));
+    std::cout << "Order created: Price = " << pair.first << ", Qty = " << pair.second << std::endl; 
+    
+  }
+  std::cout << pair.first << ", Qty = " << pair.second  << std::endl;
+  return std::nullopt;
 }

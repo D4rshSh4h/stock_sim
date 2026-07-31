@@ -59,6 +59,7 @@ class Simulator : public TradeObserver {
         std::unordered_map<int, std::unique_ptr<Agent>> agents; // maps agent id to agent object <int id, Agent agent>
         std::queue<std::weak_ptr<Order>> timeout_queue;
         RandomDecisionEngine random_decision_engine;
+        IVDecisionEngine iv_decision_engine;
 
         size_t choose_split_index(int no_agents);
         const IAgentDecisionEngine& select_engine_for_agent(int agent_id) const;
