@@ -24,6 +24,7 @@ constexpr int BASE_FCF_VALUE = 1000;
 
 //Decision Engine
 constexpr float GDP_GROWTH_RATE = 0.03;
+constexpr float THRESHOLD = 0.5;
 
 // Agent States
 enum class AgentState : char {

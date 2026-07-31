@@ -2,6 +2,7 @@
 #include "rng.h"
 #include <random>
 #include <cmath>
+#include <algorithm>
 
 bool RandomDecisionEngine::decide2() const {
   std::bernoulli_distribution dist(0.5);
@@ -84,10 +85,83 @@ std::optional<Order> RandomDecisionEngine::decide_order(const AgentDecisionConte
   return std::nullopt;
 }
 
+float IVDecisionEngine::calculate_intrinsic_value(const AgentDecisionContext &ctx) const {
+  float intr_value = 0;
+  float short_rate = ctx.g_s/1000;
+  float temp_calc;
+  for(int i = 1; i <= ctx.n; i++){
+    temp_calc = ((1+short_rate)/(1+ctx.interest_rate));
+    intr_value += std::pow(temp_calc, i);
+  }
+  float TV = calculate_terminal_value(ctx);
+  return (intr_value*ctx.company_fcf) + TV;
+ 
+}
+
+float IVDecisionEngine::calculate_terminal_value(const AgentDecisionContext &ctx) const {
+  if(ctx.interest_rate == GDP_GROWTH_RATE){
+    return 0.00;
+  }
+  float s_r = ctx.g_s/1000;
+  float temp1 = (1+GDP_GROWTH_RATE)/(ctx.interest_rate-GDP_GROWTH_RATE);
+  float temp2 = (1+s_r)/(1+ctx.interest_rate);
+  float temp3 = std::pow(temp2, ctx.n);
+  return ctx.company_fcf*temp1*temp3;
+
+}
+
+// Gap = IV per share - market price
+double IVDecisionEngine::computeGap(double iv, float mkt_price) const {
+    return (iv/TOTAL_SHARES) - mkt_price;
+}
+
+// Returns {price, qty}. qty: positive=buy, negative=sell, 0=hold (price=mkt_price on hold).
+// Threshold is the minimum gap to trigger a trade.
+std::pair<float, int> IVDecisionEngine::getPriceAndQty(double gap, float mkt_price, float threshold, double iv_per_share,
+             float cash, int shares_held, int max_qty, float delta, std::mt19937& rng, double skew_power = 2.0) const {
+    if (gap <= threshold && gap >= -threshold) return {mkt_price, 0};
+
+    bool is_buy = gap > threshold;
+
+    double normalised_gap = std::min(std::abs(gap) / mkt_price, 1.0);
+    
+
+    static thread_local std::uniform_real_distribution<double> unif(0.0, 1.0);
+    double u = unif(rng);
+    double lower, upper, t;
+    if (is_buy) {
+        lower = mkt_price - delta;
+        upper = iv_per_share;
+        t = std::pow(u, skew_power);
+    } else {
+        lower = iv_per_share;
+        upper = mkt_price + delta;
+        t = std::pow(u, 1.0 / skew_power);
+    }
+    if (upper < lower) std::swap(lower, upper);
+    float price = static_cast<float>(lower + (upper - lower) * t);
+
+    int max_qty = std::round(cash/price);
+    double raw_qty = normalised_gap * static_cast<double>(max_qty);
+    double resource_cap = is_buy
+        ? cash / std::max(iv_per_share, 1e-6)
+        : shares_held;
+    double clamped = std::min({raw_qty, resource_cap, static_cast<double>(max_qty)});
+    int qty = static_cast<int>(std::floor(std::max(clamped, 0.0)));
+
+    return {price, is_buy ? qty : -qty};
+}
+
 //Need to check order status - decide what to do if pending
 std::optional<Order> IVDecisionEngine::decide_order(const AgentDecisionContext &ctx) const {
-  // Implement your decision logic here based on the context
-  // For example, you can use the company_fcf and interest_rate to make decisions
-  // This is a placeholder implementation that always returns no order
-  return std::nullopt;
+  float IV = calculate_intrinsic_value(ctx);
+  double gap = computeGap(IV, ctx.current_price);
+  auto pair = getPriceAndQty(gap, ctx.current_price, THRESHOLD, IV/TOTAL_SHARES, ctx.cash, ctx.shares, 0, RANGE, get_rng());
+
+  if (pair.second != 0) {
+    return std::nullopt;
+  }
+  return std::make_optional(Order(float_to_int_price(pair.first), ctx.agent_id,
+                                  pair.second > 0 ? OrderType::Buy : OrderType::Sell,
+                                  ctx.current_time, OrderStatus::Active, std::abs(pair.second)));
 }

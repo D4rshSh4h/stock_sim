@@ -20,7 +20,7 @@ private:
   void place_order(Order &order);
   AgentBehaviour behaviour;
   int growth_rate;
-  int time_horizon;
+  int time_horizon; //This is BLOCKS
 
 public:
   Agent(Simulator &sim, const IAgentDecisionEngine &decision_engine, int id,

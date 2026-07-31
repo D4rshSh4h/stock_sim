@@ -37,7 +37,9 @@ void Agent::run(int time, std::pair<int, float>& world_data) {
       simulator.get_current_price(),
       time,
     world_data.first, //fcf
-    world_data.second //interest_rate
+    world_data.second, //interest_rate
+    growth_rate,
+    time_horizon
   };
   std::optional<Order> order_opt = decision_engine.decide_order(ctx);
   if (order_opt.has_value()) {
