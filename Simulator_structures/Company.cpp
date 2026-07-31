@@ -41,6 +41,11 @@ float Company::determine_business_cycle(float cycle_value){
 }
 
 int Company::generate_fcf(){
+    // Earnings release every 5 blocks (see main.cpp tick structure comments)
+    constexpr int earnings_period = TICKS_TO_BLOCK * 5;
+    if (world.get_time() % earnings_period != 0) {
+        return earnings.back();
+    }
     float multiplier = determine_business_cycle(world.get_business_cycle());
     int fcf_final = static_cast<int>(std::round(earnings.back()*multiplier));
     earnings.push_back(fcf_final);

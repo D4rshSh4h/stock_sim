@@ -1,25 +1,14 @@
+"""
+Thin entrypoint — prefer visualize.py for the full report.
 
-import pandas as pd
-import matplotlib.pyplot as plt
+  python data_processing/plotter.py
+"""
 
-# Load the CSV file
-df = pd.read_csv('trade_log.csv')
-print(df.columns)
+from pathlib import Path
+import sys
 
-# Extract the Price column
-prices = df[' Price']
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from visualize import main
 
-# Create x-axis (row indices)
-x = range(len(prices))
-
-# Plot
-plt.plot(x, prices)
-
-# Labels and title
-plt.xlabel('Row Number')
-plt.ylabel('Price')
-plt.title('Price per Row')
-
-# Show graph
-plt.show()
-print("done")
+if __name__ == "__main__":
+    main()

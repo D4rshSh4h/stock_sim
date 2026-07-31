@@ -13,6 +13,7 @@ public:
   ~Orderbook();
   
   int get_size() const;
+  int total_qty() const; // sum of active resting qty across all levels
   std::shared_ptr<Order> addOrder(const Order &order);
   void removePrice(const Order &order);
   void removeOrder(const Order &order);

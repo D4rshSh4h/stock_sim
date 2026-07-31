@@ -56,16 +56,25 @@ Orderbook& Simulator::get_sell_book() {
     return sell_book;
 }
 
+const Orderbook& Simulator::get_buy_book() const {
+    return buy_book;
+}
+
+const Orderbook& Simulator::get_sell_book() const {
+    return sell_book;
+}
+
 void Simulator::reset_volume() {
     volume = 0;
 }
 
-/*
-void Simulator::log_price() { 
-    price_time_log[time] = current_price;
-}   
-*/
+int Simulator::get_tick_volume() const {
+    return volume;
+}
 
+void Simulator::log_price(int time) {
+    price_time_log[time] = current_price;
+}
 
 void Simulator::log_volume(int time) {
     volume_time_log[time] = volume;
@@ -88,6 +97,18 @@ Agent* Simulator::get_agent(int id) {
         return it->second.get();
     }  
     return nullptr; 
+}
+
+const Agent* Simulator::get_agent(int id) const {
+    auto it = agents.find(id);
+    if (it != agents.end()) {
+        return it->second.get();
+    }
+    return nullptr;
+}
+
+const std::vector<int>& Simulator::get_agent_ids() const {
+    return agent_ids;
 }
 
 //Wrapper for buy trade in order to access function through simulator
@@ -277,7 +298,7 @@ void Simulator::initialize_agents(int no_agents) {
     for(int i = 0; i< no_agents; i++){
         const IAgentDecisionEngine& engine = select_engine_for_agent(i);
         int horizon = std::uniform_int_distribution<int>(MIN_TIME_HORIZON, MAX_TIME_HORIZON)(gen);
-        if(i < (i/2)){
+        if(i < (no_agents / 2)){
                 temp_agent_vector.emplace_back(std::make_unique<Agent>(*this, engine, i, 0.00, 0, AgentState::Uninitialized, AgentBehaviour::Conservative, horizon));
         }
         else{

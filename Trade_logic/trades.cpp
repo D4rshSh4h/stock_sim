@@ -1,8 +1,10 @@
 #include "trades.h"
 #include "TradeLogger.h"
 #include "../config.h"
+#include "../file_handler.h"
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 
 //TradeObserver setup to access some methods from simulator
@@ -138,6 +140,7 @@ void prepare_file(void) {
         std::cout << "Unable to initialize volume log file." << std::endl;
     }
 
+    prepare_extra_logs();
 }
 
 //Is called after any two trades match. Calls method in simulator to handle resource allocation, and then trade logger to log the trade
@@ -150,7 +153,8 @@ void log_trade(Order& buyer, Order& seller, float price, float spread, int qty, 
         std::cout << "No trade observer set. Unable to update agent states." << std::endl;
     }
 
-    TradeLogger::instance().log(buyer.getId(), seller.getId(), price, spread, qty, trade_type);
+    int trade_time = std::max(buyer.getTimePlaced(), seller.getTimePlaced());
+    TradeLogger::instance().log(buyer.getId(), seller.getId(), price, spread, qty, trade_type, trade_time);
 }
 
 

@@ -1,6 +1,7 @@
 #include "Agent.h"
 #include "DecisionEngine.h"
 #include "Simulator.h"
+#include "../file_handler.h"
 #include <optional>
 
 //Agent types:
@@ -13,10 +14,23 @@ Agent::Agent(Simulator &sim, const IAgentDecisionEngine &decision_engine, int id
 Agent::~Agent() {}
 
 //Calls functions to place an order via simulator
-void Agent::place_order(Order &order) { 
+void Agent::place_order(Order &order) {
+  float order_price = int_to_float_price(order.getPrice());
+  log_order(order.getTimePlaced(),
+            id,
+            static_cast<int>(order.getTradeType()),
+            order_price,
+            order.getQty(),
+            growth_rate,
+            static_cast<int>(behaviour),
+            time_horizon,
+            cash,
+            shares,
+            simulator.get_current_price());
+
   if (order.getTradeType() == OrderType::Buy) {
     simulator.simulator_buy_trade(order);
-    cash -= int_to_float_price(order.getPrice())*order.getQty(); // Deduct cash immediately when placing a buy order
+    cash -= order_price * order.getQty(); // Deduct cash immediately when placing a buy order
   } else {
     simulator.simulator_sell_trade(order);
     shares -= order.getQty(); 

@@ -1,2 +1,5 @@
 .clang*
 *.dSYM/
+data_processing/output/
+data_processing/.mplconfig/
+.mplconfig/

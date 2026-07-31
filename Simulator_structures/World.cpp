@@ -5,7 +5,7 @@
 World::~World() {}
 
 World::World() : freq_multiplier(2.0*pi / TICKS_PER_CYCLE){
-    //std::cout << freq_multiplier << std::endl;
+    change_interest_rate(); // valid starting rate before first scheduled update
 }
 
 int World::get_time() const {

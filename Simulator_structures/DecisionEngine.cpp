@@ -3,7 +3,6 @@
 #include <random>
 #include <cmath>
 #include <algorithm>
-#include <iostream>
 
 bool RandomDecisionEngine::decide2() const {
   std::bernoulli_distribution dist(0.5);
@@ -88,7 +87,8 @@ std::optional<Order> RandomDecisionEngine::decide_order(const AgentDecisionConte
 
 float IVDecisionEngine::calculate_intrinsic_value(const AgentDecisionContext &ctx) const {
   float intr_value = 0;
-  float short_rate = ctx.g_s/1000;
+  // g_s is stored in thousandths (e.g. 200 -> 20% short-term growth)
+  float short_rate = ctx.g_s / 1000.0f;
   float temp_calc;
   for(int i = 1; i <= ctx.n; i++){
     temp_calc = ((1+short_rate)/(1+ctx.interest_rate));
@@ -100,14 +100,17 @@ float IVDecisionEngine::calculate_intrinsic_value(const AgentDecisionContext &ct
 }
 
 float IVDecisionEngine::calculate_terminal_value(const AgentDecisionContext &ctx) const {
-  if(ctx.interest_rate == GDP_GROWTH_RATE){
-    return 0.00;
+  // Require a minimum equity risk premium over GDP growth to avoid explosive TV.
+  float excess_return = ctx.interest_rate - GDP_GROWTH_RATE;
+  constexpr float min_excess = 0.005f;
+  if (excess_return < min_excess) {
+    excess_return = min_excess;
   }
-  float s_r = ctx.g_s/1000;
-  float temp1 = (1+GDP_GROWTH_RATE)/(ctx.interest_rate-GDP_GROWTH_RATE);
-  float temp2 = (1+s_r)/(1+ctx.interest_rate);
+  float s_r = ctx.g_s / 1000.0f;
+  float temp1 = (1 + GDP_GROWTH_RATE) / excess_return;
+  float temp2 = (1 + s_r) / (1 + ctx.interest_rate);
   float temp3 = std::pow(temp2, ctx.n);
-  return ctx.company_fcf*temp1*temp3;
+  return ctx.company_fcf * temp1 * temp3;
 
 }
 
@@ -118,36 +121,47 @@ double IVDecisionEngine::computeGap(double iv, float mkt_price) const {
 
 // Returns {price, qty}. qty: positive=buy, negative=sell, 0=hold (price=mkt_price on hold).
 // Threshold is the minimum gap to trigger a trade.
+// delta is a fraction of mkt_price (same convention as RandomDecisionEngine / RANGE).
 std::pair<float, int> IVDecisionEngine::getPriceAndQty(double gap, float mkt_price, float threshold, double iv_per_share,
              float cash, int shares_held, int max_qty, float delta, double skew_power) const {
     if (gap <= threshold && gap >= -threshold) return {mkt_price, 0};
 
     bool is_buy = gap > threshold;
 
-    double normalised_gap = std::min(std::abs(gap) / mkt_price, 1.0);
-    
+    double normalised_gap = std::min(std::abs(gap) / std::max(static_cast<double>(mkt_price), 1e-6), 1.0);
 
     static thread_local std::uniform_real_distribution<double> unif(0.0, 1.0);
     double u = unif(get_rng());
     double lower, upper, t;
+    double price_delta = static_cast<double>(delta) * mkt_price;
     if (is_buy) {
-        lower = mkt_price - delta;
+        lower = mkt_price - price_delta;
         upper = iv_per_share;
         t = std::pow(u, skew_power);
     } else {
         lower = iv_per_share;
-        upper = mkt_price + delta;
+        upper = mkt_price + price_delta;
         t = std::pow(u, 1.0 / skew_power);
     }
     if (upper < lower) std::swap(lower, upper);
+    if (lower < 0.0) lower = 0.0;
     float price = static_cast<float>(lower + (upper - lower) * t);
+    if (price <= 0.0f) return {mkt_price, 0};
 
-    max_qty = std::round(cash/price);
-    double raw_qty = normalised_gap * static_cast<double>(max_qty);
+    // Capacity must be resource-correct: cash for buys, shares for sells.
+    // (Previously always used cash/price, so cash=0 share-holders could never sell.)
+    int capacity = is_buy
+        ? static_cast<int>(std::floor(cash / price))
+        : shares_held;
+    if (max_qty > 0) {
+        capacity = std::min(capacity, max_qty);
+    }
+
+    double raw_qty = normalised_gap * static_cast<double>(capacity);
     double resource_cap = is_buy
         ? cash / std::max(iv_per_share, 1e-6)
-        : shares_held;
-    double clamped = std::min({raw_qty, resource_cap, static_cast<double>(max_qty)});
+        : static_cast<double>(shares_held);
+    double clamped = std::min({raw_qty, resource_cap, static_cast<double>(capacity)});
     int qty = static_cast<int>(std::floor(std::max(clamped, 0.0)));
 
     return {price, is_buy ? qty : -qty};
@@ -163,9 +177,6 @@ std::optional<Order> IVDecisionEngine::decide_order(const AgentDecisionContext &
     return std::make_optional(Order(float_to_int_price(pair.first), ctx.agent_id,
                                   pair.second > 0 ? OrderType::Buy : OrderType::Sell,
                                   ctx.current_time, OrderStatus::Active, std::abs(pair.second)));
-    std::cout << "Order created: Price = " << pair.first << ", Qty = " << pair.second << std::endl; 
-    
   }
-  std::cout << pair.first << ", Qty = " << pair.second  << std::endl;
   return std::nullopt;
 }

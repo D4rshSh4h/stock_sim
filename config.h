@@ -9,8 +9,9 @@ const double pi = std::acos(-1);
 //World
 constexpr int TICKS_TO_BLOCK = 5;
 constexpr int TICKS_PER_CYCLE = 20;
-constexpr float RATE_MIN = 1;
-constexpr float RATE_MAX = 10;
+// Decimal rates for DCF (must match GDP_GROWTH_RATE scale, e.g. 0.03 = 3%)
+constexpr float RATE_MIN = 0.03;
+constexpr float RATE_MAX = 0.09;
 constexpr float AMPLITUDE = (RATE_MAX-RATE_MIN)/2.0;
 constexpr float MIDPOINT = (RATE_MAX+RATE_MIN)/2.0;
 
@@ -20,7 +21,8 @@ constexpr int MIN_TIME_HORIZON = 2;
 constexpr int GROWTH_RATE_BENCHMARK = 200;
 
 //Company
-constexpr int BASE_FCF_VALUE = 1000;
+// Sized so DCF fair value is near INITIAL_PRICE at mid rates / mid growth beliefs
+constexpr int BASE_FCF_VALUE = 25000;
 
 //Decision Engine
 constexpr float GDP_GROWTH_RATE = 0.03;

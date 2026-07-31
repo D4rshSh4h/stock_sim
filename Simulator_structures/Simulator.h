@@ -8,6 +8,8 @@
 #include <unordered_map>
 #include <memory>
 #include <queue>
+#include <vector>
+#include <map>
 
 class Agent;
  
@@ -20,12 +22,15 @@ class Simulator : public TradeObserver {
         int get_volume(int time) const; //Gets a single volume
         float get_price(int time) const; //Gets a single price
         void update_time(); 
-        void log_price(); //Adds current price to price_time_log with current time as key
+        void log_price(int time); //Adds current price to price_time_log with current time as key
         void log_volume(int time); //Adds current volume to volume_time_log with current time as key
         void update_price(float lowest_ask, float highest_bid);
         Orderbook& get_buy_book();
-        Orderbook& get_sell_book(); 
+        Orderbook& get_sell_book();
+        const Orderbook& get_buy_book() const;
+        const Orderbook& get_sell_book() const;
         Agent* get_agent(int id);
+        const Agent* get_agent(int id) const;
         void simulator_buy_trade(Order& order);
         void simulator_sell_trade(Order& order); 
        // void on_trade_executed(const Order& buy_order, const Order& sell_order, float price, float spread) override;
@@ -35,6 +40,7 @@ class Simulator : public TradeObserver {
         void update_time_order_index(std::shared_ptr<Order> order_ptr) override;
         void create_vector_agent_ids(); 
         std::vector<int> shuffle_agent_ids();
+        const std::vector<int>& get_agent_ids() const;
         void reset_volume();
         std::map<int, int> get_volume_time_log();
         const std::map<int, int>& get_volume_time_log_ref() const;
@@ -43,7 +49,7 @@ class Simulator : public TradeObserver {
         void find_order_timeouts(int time, int timeout_duration = 5);
         void initialize_agents(int no_agents = 10);
         void simulator_start(int no_agents = 10); // compatibility wrapper
-        
+        int get_tick_volume() const;
     private:
         float current_price;
         int volume;

@@ -91,6 +91,18 @@ int Orderbook::get_size() const {
     return orderbook.size();
 }
 
+int Orderbook::total_qty() const {
+    int total = 0;
+    for (const auto& level : orderbook) {
+        for (const auto& order_ptr : level.second) {
+            if (order_ptr && order_ptr->getStatus() == OrderStatus::Active) {
+                total += order_ptr->getQty();
+            }
+        }
+    }
+    return total;
+}
+
 std::list<std::shared_ptr<Order>>* Orderbook::get_orders_at_price(int price){
     auto it = orderbook.find(price);
     if (it != orderbook.end()) {
