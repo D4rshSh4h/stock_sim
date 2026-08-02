@@ -1,5 +1,7 @@
 .clang*
 *.dSYM/
+*.vscode/
 data_processing/output/
 data_processing/.mplconfig/
 .mplconfig/
+Tests/
