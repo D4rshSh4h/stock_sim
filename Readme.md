@@ -16,6 +16,7 @@ Note that all simulation parameters are in config.h
 ## Video Link
 
 Here is the link to a [video walkthrough](https://vimeo.com/1214948888?share=copy&fl=sv&fe=ci) and demo.
+
 NOTE: The actual project running is quite short as most data is logged onto CSV files. Skip to around 25.15 to see the project running
 
 ---
@@ -28,7 +29,8 @@ Compile all files in Order_structures, Simulator_structures and Trade_logic alon
 ### Disclaimer
 Although i'm trying to make it as accurate as possible this project is for fun and will not fully simulate any financial market.
 
-Excuse the poor documentation - it will be fixed soon (I promise)
+Excuse the poor documentation - it will be fixed soon (I promise). 
+
 The new IVDecisionEngine used by agents is not yet perfect which might result in abnormal prices during the simulator. 
 
 
