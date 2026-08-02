@@ -233,7 +233,7 @@ const IAgentDecisionEngine& Simulator::select_engine_for_agent(int agent_id) con
     (void)agent_id;
     // Default path: all agents use the same engine. This is the extension point
     // for per-agent engine assignment inside initialize_agents/simulator_start.
-    return iv_decision_engine;
+    return random_decision_engine;
 }
 
 bool Simulator::allocate_cash_agents(std::vector<std::unique_ptr<Agent>>& temp_agent_vector, int no_cash_agents) {

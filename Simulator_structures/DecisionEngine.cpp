@@ -148,8 +148,7 @@ std::pair<float, int> IVDecisionEngine::getPriceAndQty(double gap, float mkt_pri
     float price = static_cast<float>(lower + (upper - lower) * t);
     if (price <= 0.0f) return {mkt_price, 0};
 
-    // Capacity must be resource-correct: cash for buys, shares for sells.
-    // (Previously always used cash/price, so cash=0 share-holders could never sell.)
+    
     int capacity = is_buy
         ? static_cast<int>(std::floor(cash / price))
         : shares_held;

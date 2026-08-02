@@ -8,10 +8,9 @@ const double pi = std::acos(-1);
 
 //World
 constexpr int TICKS_TO_BLOCK = 5;
-constexpr int TICKS_PER_CYCLE = 20;
-// Decimal rates for DCF (must match GDP_GROWTH_RATE scale, e.g. 0.03 = 3%)
-constexpr float RATE_MIN = 0.03;
-constexpr float RATE_MAX = 0.09;
+constexpr int TICKS_PER_CYCLE = 100;
+constexpr float RATE_MIN = 0.01;
+constexpr float RATE_MAX = 0.15;
 constexpr float AMPLITUDE = (RATE_MAX-RATE_MIN)/2.0;
 constexpr float MIDPOINT = (RATE_MAX+RATE_MIN)/2.0;
 
@@ -59,10 +58,10 @@ enum class AgentBehaviour{
 // Simulator specific constants
 constexpr float RANGE = 0.05f; 
 constexpr float BUFFER = 10.0f; // Buffer for price generation
-constexpr int NO_AGENTS = 50;
-constexpr int TICKS = 100;
+constexpr int NO_AGENTS = 100;
+constexpr int TICKS = 1000;
 constexpr float INITIAL_PRICE = 100.0f;
-constexpr float TOTAL_CASH = 200000.0f;
+constexpr float TOTAL_CASH = 20000000.0f;
 constexpr int TOTAL_SHARES = 10000;
 constexpr int TIMEOUT_DURATION = 10;
 constexpr int NO_BOOK_PRICE_INT = -1;
