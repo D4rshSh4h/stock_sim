@@ -13,17 +13,23 @@ Note that all simulation parameters are in config.h
 
 ---
 
-## Future tasks
-Currently working on a more accurate simulator. This will include agents with different 'personalities' to simulate varied behaviour like in real markets. Furthermore, the simulator will be encapsulated in a 'financial world', which will influence interest rates and money supply for some macro factors. 
+## Video Link
 
-Updates for data processing, logging and presentation will be continous
+Here is the link to a [video walkthrough](https://vimeo.com/1214948888?share=copy&fl=sv&fe=ci) and demo.
+NOTE: The actual project running is quite short as most data is logged onto CSV files. Skip to around 25.15 to see the project running
 
 ---
 
+## Usage
+
+Compile all files in Order_structures, Simulator_structures and Trade_logic along with main, config and file_handler. Adjust values in config (you can play around with them) and run to see values printed in your csv files. 
+
+---
 ### Disclaimer
 Although i'm trying to make it as accurate as possible this project is for fun and will not fully simulate any financial market.
 
 Excuse the poor documentation - it will be fixed soon (I promise)
+The new IVDecisionEngine used by agents is not yet perfect which might result in abnormal prices during the simulator. 
 
 
 Credit - github@D4rshSh4h
