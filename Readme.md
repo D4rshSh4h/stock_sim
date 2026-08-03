@@ -23,7 +23,9 @@ NOTE: The actual project running is quite short as most data is logged onto CSV 
 
 ## Usage
 
-Compile all files in Order_structures, Simulator_structures and Trade_logic along with main, config and file_handler. Adjust values in config (you can play around with them) and run to see values printed in your csv files. 
+Link on releases will show output using pre-configurated values FOR WINDOWS ONLY. For mac/linux, or to change values, download the repo and build/run it yourself.
+
+Compile all files in Order_structures, Simulator_structures and Trade_logic along with main, config and file_handler. Adjust values in config.h (you can play around with them) and run to see values printed in your csv files. 
 
 ---
 ### Disclaimer
