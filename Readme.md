@@ -13,14 +13,6 @@ Note that all simulation parameters are in config.h
 
 ---
 
-## Video Link
-
-Here is the link to a [video walkthrough](https://vimeo.com/1214948888?share=copy&fl=sv&fe=ci) and demo.
-
-NOTE: The actual project running is quite short as most data is logged onto CSV files. Skip to around 25.15 to see the project running
-
----
-
 ## Usage
 
 Link on releases will show output using pre-configurated values FOR WINDOWS ONLY. For mac/linux, or to change values, download the repo and build/run it yourself.
